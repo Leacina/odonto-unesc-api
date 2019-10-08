@@ -5,7 +5,7 @@ module.exports = {
     /*
       Criação da tabela Video-Case para vincular os videos e casos.
     */
-    return queryInterface.createTable('Video-Case', {
+    return queryInterface.createTable('Video_Case', {
       id: {
         allowNull: false,
         autoIncrement: true,
