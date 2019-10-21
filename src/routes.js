@@ -1,4 +1,4 @@
-const URL = '/api/v1.0/'
+const URL = '/api/'
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('../swagger.json')
@@ -8,9 +8,51 @@ const swaggerDocument = require('../swagger.json')
  */
 module.exports = app => {
 
-    //app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+    //Rota para os professores
+    app.route(URL + 'teacher')
+        .post(app.src.controllers.TeacherController.store)
+        .get(app.src.controllers.TeacherController.index)
+        .put(app.src.controllers.TeacherController.update)
+    app.route(URL + 'teacher/:id')
+        .delete(app.src.controllers.TeacherController.destroy)
+        .get(app.src.controllers.TeacherController.show)
+
+    //Rota para os estudantes
+    app.route(URL + 'student')
+        .post(app.src.controllers.StudentController.store)
+        .get(app.src.controllers.StudentController.index)
+        .put(app.src.controllers.StudentController.update)
+    app.route(URL + 'student/:id')
+        .delete(app.src.controllers.StudentController.destroy)
+        .get(app.src.controllers.StudentController.show)
 
     //Rota para os casos
     app.route(URL + 'case')
-        .get(app.src.controllers.CaseController.store)
+        .post(app.src.controllers.CaseController.store)
+        .get(app.src.controllers.CaseController.index)
+        .put(app.src.controllers.CaseController.update)
+    app.route(URL + 'case/:id')
+        .delete(app.src.controllers.CaseController.destroy)
+        .get(app.src.controllers.CaseController.show)
+
+    //Rota para as atividades
+    app.route(URL + 'lesson')
+        .post(app.src.controllers.LessonController.store)
+        .get(app.src.controllers.LessonController.index)
+        .put(app.src.controllers.LessonController.update)
+    app.route(URL + 'lesson/:id')
+        .delete(app.src.controllers.LessonController.destroy)
+        .get(app.src.controllers.LessonController.show)
+
+    //Rota para os videos
+    app.route(URL + 'video')
+        .post(app.src.controllers.VideoController.store)
+        .get(app.src.controllers.VideoController.index)
+        .put(app.src.controllers.VideoController.update)
+    app.route(URL + 'video/:id')
+        .delete(app.src.controllers.VideoController.destroy)
+        .get(app.src.controllers.VideoController.show)
+        
+    app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
 }
