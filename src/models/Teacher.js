@@ -5,6 +5,9 @@ module.exports = (sequelize, DataTypes) => {
         name: DataTypes.STRING,
         code: DataTypes.INTEGER,
         password: DataTypes.STRING,
+    },{
+        //Adicionado para gerar a tabela no singular
+        freezeTableName: true,
     });
 
     return Teacher

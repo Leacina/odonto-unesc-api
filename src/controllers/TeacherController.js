@@ -41,9 +41,11 @@ module.exports = app => {
     */
     const store = async (req, res) => {
         try{
-            
+    
             //Valida as regras de negocio e retorna o objeto caso esteja correto
             const Teacher = await app.src.services.TeacherService.valideStore(req.body)
+
+            Teacher.password = ''
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Teacher)
@@ -69,7 +71,7 @@ module.exports = app => {
     */
     const update = async (req, res) => {
         try{
-            
+       
             //Valida as regras de negocio e retorna o objeto caso esteja correto
             const Teacher = await app.src.services.TeacherService.valideUpdate(req.body)
 

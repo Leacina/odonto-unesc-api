@@ -1,7 +1,17 @@
 const { Teacher } = require('../models');
+const bcrypt = require('bcrypt-nodejs')
 
 module.exports = app => {
     const {existsOrError} = app.src.services.ValidationService;
+
+    /**
+     * Responsavel por criptografar as senhas
+     * @param {senha} password 
+     */
+    const encryptPassword = password => {
+        const salt = bcrypt.genSaltSync(10)
+        return bcrypt.hashSync(password,salt)
+    }
 
     /**
      * Valida os dados que serão inseridos
@@ -10,7 +20,7 @@ module.exports = app => {
     const valideStore = async (value) => {
         
         try{
-            
+        
             //Verifica se o objeto passado esta correto
             existsOrError(value,'Formato dos dados invalido')
 
@@ -18,6 +28,9 @@ module.exports = app => {
             existsOrError(value.name,'Nome não informado!')
             existsOrError(value.code,'Código não informado!')
             existsOrError(value.password,'Senha não informada!')
+            
+            value.password = encryptPassword(value.password)
+          
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
             return Teacher.create(value)
            

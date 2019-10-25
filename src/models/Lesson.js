@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
         expiration_date: DataTypes.DATE,
         start_date: DataTypes.DATE,
         id_teacher: DataTypes.INTEGER,
+    },{
+        //Adicionado para gerar a tabela no singular
+        freezeTableName: true,
     });
 
     return Lesson

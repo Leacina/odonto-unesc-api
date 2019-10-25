@@ -5,6 +5,9 @@ module.exports = (sequelize, DataTypes) => {
         name: DataTypes.STRING,
         url: DataTypes.STRING,
         is_active: DataTypes.BOOLEAN,
+    },{
+        //Adicionado para gerar a tabela no singular
+        freezeTableName: true,
     });
 
     return Video
