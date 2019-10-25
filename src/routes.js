@@ -13,16 +13,18 @@ module.exports = app => {
 
     //Rota para os professores
     app.route(URL + 'teacher')
-        //.all(app.src.config.passport.authenticate())
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.TeacherController.store)
         .get(app.src.controllers.TeacherController.index)
         .put(app.src.controllers.TeacherController.update)
     app.route(URL + 'teacher/:id')
+        .all(app.src.config.passport.authenticate())
         .delete(app.src.controllers.TeacherController.destroy)
         .get(app.src.controllers.TeacherController.show)
 
     //Rota para os estudantes
     app.route(URL + 'student')
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.StudentController.store)
         .get(app.src.controllers.StudentController.index)
         .put(app.src.controllers.StudentController.update)
@@ -32,6 +34,7 @@ module.exports = app => {
 
     //Rota para os casos
     app.route(URL + 'case')
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.CaseController.store)
         .get(app.src.controllers.CaseController.index)
         .put(app.src.controllers.CaseController.update)
@@ -41,6 +44,7 @@ module.exports = app => {
 
     //Rota para as atividades
     app.route(URL + 'lesson')
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.LessonController.store)
         .get(app.src.controllers.LessonController.index)
         .put(app.src.controllers.LessonController.update)
@@ -50,6 +54,7 @@ module.exports = app => {
 
     //Rota para os videos
     app.route(URL + 'video')
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.VideoController.store)
         .get(app.src.controllers.VideoController.index)
         .put(app.src.controllers.VideoController.update)

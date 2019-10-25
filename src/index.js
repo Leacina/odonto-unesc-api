@@ -2,6 +2,7 @@ const app = require('express')()
 const consign = require('consign')
 
 consign()
+.include('./src/config/passport.js')
     .then('./src/config/middlewares.js')
     .then('./src/services/ValidationService.js')
     .then('./src/services')
