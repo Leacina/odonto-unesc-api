@@ -30,7 +30,7 @@ module.exports = app => {
             code: teacher.code,
             type: 'admin',
             issued_at: now,
-            expires_at: now + (60 * 60 * 24 * 3)
+            expire_at: now + (60 * 60 * 24 * 3)
         }
 
         return res.json({
