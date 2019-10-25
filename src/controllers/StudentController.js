@@ -7,7 +7,7 @@ module.exports = app => {
      */
     const index = async (req, res) => {
         try{
-            const Student = await app.src.services.StudentService.valideIndex()
+            const Student = await app.src.services.StudentService.index()
 
             res.send(Student)
         }catch(err){
@@ -24,7 +24,7 @@ module.exports = app => {
      */
     const show = async (req, res) => {
         try{
-            const Student = await app.src.services.StudentService.valideShow(req.params.id)
+            const Student = await app.src.services.StudentService.show(req.params.id)
 
             res.send(Student)
         }catch(err){
@@ -43,7 +43,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Student = await app.src.services.StudentService.valideStore(req.body)
+            const Student = await app.src.services.StudentService.store(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Student)
@@ -70,7 +70,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Student = await app.src.services.StudentService.valideUpdate(req.body)
+            const Student = await app.src.services.StudentService.update(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Student)
@@ -96,7 +96,7 @@ module.exports = app => {
     const destroy = async (req, res) => {
 
         try{
-            const Student = await app.src.services.StudentService.valideDestroy(req.params.id) 
+            const Student = await app.src.services.StudentService.destroy(req.params.id) 
 
             res.send(Student)
         }catch(err){

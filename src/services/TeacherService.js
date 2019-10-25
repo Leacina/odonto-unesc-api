@@ -17,7 +17,7 @@ module.exports = app => {
      * Valida os dados que serão inseridos
      * @param {Valor que será validado} value 
      */
-    const valideStore = async (value) => {
+    const store = async (value) => {
         
         try{
         
@@ -31,6 +31,16 @@ module.exports = app => {
             
             value.password = encryptPassword(value.password)
           
+            const teacher = Teacher.findOne({
+                where:{
+                    code:value.code
+                }
+            })
+
+            if(teacher.code){
+                throw  'Ja existe um professor com mesmo código'
+            }
+
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
             return Teacher.create(value)
            
@@ -46,7 +56,7 @@ module.exports = app => {
      * Valida os dados que serão deletados
      * @param {Valor que será validado} value 
      */
-    const valideDestroy = async (value) => {
+    const destroy = async (value) => {
 
         try{
             //Delete o professor
@@ -70,7 +80,7 @@ module.exports = app => {
      * Valida os dados que serão alterados
      * @param {Valor que será validado} value 
      */
-    const valideUpdate = async (value) => {
+    const update = async (value) => {
 
         try{
             //Verifica se o objeto passado esta correto
@@ -102,7 +112,7 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-    const valideIndex = async () => {
+    const index = async () => {
 
         try{
            //Retorna todos os professores
@@ -117,7 +127,7 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-   const valideShow = async (value) => {
+   const show = async (value) => {
         try{
             //Retorna o professor pelo id
             return Teacher.findAll({
@@ -130,5 +140,5 @@ module.exports = app => {
         }
     }
 
-    return {valideStore, valideDestroy, valideShow, valideIndex, valideUpdate}
+    return {store, destroy, show, index, update}
 }

@@ -7,7 +7,7 @@ module.exports = app => {
      */
     const index = async (req, res) => {
         try{
-            const Lesson = await app.src.services.LessonService.valideIndex()
+            const Lesson = await app.src.services.LessonService.index()
 
             res.send(Lesson)
         }catch(err){
@@ -24,7 +24,7 @@ module.exports = app => {
      */
     const show = async (req, res) => {
         try{
-            const Lesson = await app.src.services.LessonService.valideShow(req.params.id)
+            const Lesson = await app.src.services.LessonService.show(req.params.id)
 
             res.send(Lesson)
         }catch(err){
@@ -43,7 +43,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Lesson = await app.src.services.LessonService.valideStore(req.body)
+            const Lesson = await app.src.services.LessonService.store(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Lesson)
@@ -73,7 +73,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Lesson = await app.src.services.LessonService.valideUpdate(req.body)
+            const Lesson = await app.src.services.LessonService.update(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Lesson)
@@ -102,7 +102,7 @@ module.exports = app => {
     const destroy = async (req, res) => {
 
         try{
-            const Lesson = await app.src.services.LessonService.valideDestroy(req.params.id) 
+            const Lesson = await app.src.services.LessonService.destroy(req.params.id) 
 
             res.send(Lesson)
         }catch(err){

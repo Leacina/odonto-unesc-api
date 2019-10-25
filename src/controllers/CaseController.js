@@ -7,7 +7,7 @@ module.exports = app => {
      */
     const index = async (req, res) => {
         try{
-            const Case = await app.src.services.CaseService.valideIndex()
+            const Case = await app.src.services.CaseService.index()
 
             res.send(Case)
         }catch(err){
@@ -24,7 +24,7 @@ module.exports = app => {
      */
     const show = async (req, res) => {
         try{
-            const Case = await app.src.services.CaseService.valideShow(req.params.id)
+            const Case = await app.src.services.CaseService.show(req.params.id)
 
             res.send(Case)
         }catch(err){
@@ -43,7 +43,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Case = await app.src.services.CaseService.valideStore(req.body)
+            const Case = await app.src.services.CaseService.store(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Case)
@@ -71,7 +71,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Case = await app.src.services.CaseService.valideUpdate(req.body)
+            const Case = await app.src.services.CaseService.update(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Case)
@@ -98,7 +98,7 @@ module.exports = app => {
     const destroy = async (req, res) => {
 
         try{
-            const Case = await app.src.services.CaseService.valideDestroy(req.params.id) 
+            const Case = await app.src.services.CaseService.destroy(req.params.id) 
 
             res.send(Case)
         }catch(err){

@@ -7,7 +7,7 @@ module.exports = app => {
      * Valida os dados que serão inseridos
      * @param {Valor que será validado} value 
      */
-    const valideStore = async (value) => {
+    const store = async (value) => {
         
         try{
             
@@ -32,7 +32,7 @@ module.exports = app => {
      * Valida os dados que serão deletados
      * @param {Valor que será validado} value 
      */
-    const valideDestroy = async (value) => {
+    const destroy = async (value) => {
 
         try{
             //Delete o professor
@@ -56,7 +56,7 @@ module.exports = app => {
      * Valida os dados que serão alterados
      * @param {Valor que será validado} value 
      */
-    const valideUpdate = async (value) => {
+    const update = async (value) => {
 
         try{
             //Verifica se o objeto passado esta correto
@@ -87,7 +87,7 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-    const valideIndex = async () => {
+    const index = async () => {
 
         try{
            //Retorna todos os estudantes
@@ -102,7 +102,7 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-   const valideShow = async (value) => {
+   const show = async (value) => {
         try{
             //Retorna o estudante pelo id
             return Student.findAll({
@@ -115,5 +115,5 @@ module.exports = app => {
         }
     }
 
-    return {valideStore, valideDestroy, valideShow, valideIndex, valideUpdate}
+    return {store, destroy, show, index, update}
 }

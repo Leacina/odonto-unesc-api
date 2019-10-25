@@ -7,7 +7,7 @@ module.exports = app => {
      */
     const index = async (req, res) => {
         try{
-            const Teacher = await app.src.services.TeacherService.valideIndex()
+            const Teacher = await app.src.services.TeacherService.index()
 
             res.send(Teacher)
         }catch(err){
@@ -24,7 +24,7 @@ module.exports = app => {
      */
     const show = async (req, res) => {
         try{
-            const Teacher = await app.src.services.TeacherService.valideShow(req.params.id)
+            const Teacher = await app.src.services.TeacherService.show(req.params.id)
 
             res.send(Teacher)
         }catch(err){
@@ -43,7 +43,7 @@ module.exports = app => {
         try{
     
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Teacher = await app.src.services.TeacherService.valideStore(req.body)
+            const Teacher = await app.src.services.TeacherService.store(req.body)
 
             Teacher.password = ''
 
@@ -73,7 +73,7 @@ module.exports = app => {
         try{
        
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Teacher = await app.src.services.TeacherService.valideUpdate(req.body)
+            const Teacher = await app.src.services.TeacherService.update(req.body)
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Teacher)
@@ -100,7 +100,7 @@ module.exports = app => {
     const destroy = async (req, res) => {
 
         try{
-            const Teacher = await app.src.services.TeacherService.valideDestroy(req.params.id) 
+            const Teacher = await app.src.services.TeacherService.destroy(req.params.id) 
 
             res.send(Teacher)
         }catch(err){
