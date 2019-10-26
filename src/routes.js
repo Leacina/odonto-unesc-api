@@ -13,7 +13,7 @@ module.exports = app => {
 
     //Rota para os professores
     app.route(URL + 'teacher')
-        .all(app.src.config.passport.authenticate())
+        //.all(app.src.config.passport.authenticate())
         .post(app.src.controllers.TeacherController.store)
         .get(app.src.controllers.TeacherController.index)
         .put(app.src.controllers.TeacherController.update)
