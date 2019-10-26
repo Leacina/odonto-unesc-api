@@ -28,7 +28,7 @@ module.exports = app => {
             id: teacher.id,
             name: teacher.name,
             code: teacher.code,
-            type: 'admin',
+            manager: 'admin',
             issued_at: now,
             expire_at: now + (60 * 60 * 24 * 3)
         }
