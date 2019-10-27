@@ -24,12 +24,8 @@ module.exports = app => {
                 }
             });
 
-            if (video) {
-                throw  'Já existe um video com mesmo nome';
-            }
+            if (video) { throw  'Já existe um video com mesmo nome'; }
 
-            console.log('recebendo video');
-            
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
             return Video.create({
                 url,
@@ -64,7 +60,7 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-   const show = async (value) => {
+    const show = async (value) => {
         
     }
 
