@@ -11,7 +11,6 @@ module.exports = app => {
 
         fs.stat(movieFile, (err, stats) => {
             if (err) {
-                console.log(err);
                 return res.status(404).end('Vídeo não encontrado');
             }
 
