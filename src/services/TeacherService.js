@@ -10,7 +10,7 @@ module.exports = app => {
      */
     const encryptPassword = password => {
         const salt = bcrypt.genSaltSync(10)
-        return bcrypt.hashSync(password,salt)
+        return bcrypt.hashSync(password, salt);
     }
 
     /**
@@ -18,36 +18,45 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const store = async (value) => {
-        
-        try{
-        
+        try {
+            const { name, email, code, manager, password, active } = value;
+
             //Verifica se o objeto passado esta correto
-            existsOrError(value,'Formato dos dados invalido')
+            existsOrError(value, 'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
-            existsOrError(value.name,'Nome não informado!')
-            existsOrError(value.code,'Código não informado!')
-            existsOrError(value.password,'Senha não informada!')
+            existsOrError(name, 'Nome não informado!');
+            existsOrError(code, 'Código não informado!');
+            existsOrError(email, 'Email não informado!');
+            existsOrError(password, 'Senha não informada!');
+            existsOrError(active, 'Status não informado!');
             
-            value.password = encryptPassword(value.password)
+            const encryptedPassword = encryptPassword(password);
           
-            const teacher = Teacher.findOne({
-                where:{
-                    code:value.code
+            const teacher = await Teacher.findOne({
+                where: {
+                    code
                 }
-            })
+            });
 
-            if(teacher.code){
-                throw  'Ja existe um professor com mesmo código'
+            if (teacher) {
+                throw  'Já existe um professor com mesmo código';
             }
 
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
-            return Teacher.create(value)
+            return Teacher.create({
+                name,
+                code,
+                email,
+                password: encryptedPassword,
+                manager,
+                active
+            });
            
-        }catch(err){
+        } catch(err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
-            throw err
+            throw err;
         }
 
     }
@@ -57,21 +66,20 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const destroy = async (value) => {
-
         try{
             //Delete o professor
             const rowsDeleted = Teacher.destroy({
                 where:{
                     id: value
                 }
-            })
+            });
           
             //Caso não encontrar o professor, gera uma exceção
-            existsOrError(rowsDeleted, 'Professor não foi encontrada.')
+            existsOrError(rowsDeleted, 'Professor não foi encontrada.');
             
-            return rowsDeleted
-        }catch(err){
-            throw err
+            return rowsDeleted;
+        } catch(err) {
+            throw err;
         }
 
     }
@@ -81,30 +89,41 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const update = async (value) => {
+        try {
+            const { id, name, email, code, manager, password } = value;
 
-        try{
             //Verifica se o objeto passado esta correto
-            existsOrError(value,'Formato dos dados invalido')
+            existsOrError(value,'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
-            existsOrError(value.name,'Nome não informado!')
-            existsOrError(value.code,'Código não informado!')
-            existsOrError(value.password,'Senha não informada!')
+            existsOrError(name, 'Nome não informado!');
+            existsOrError(email, 'Email não informado!');
+            existsOrError(code, 'Código não informado!');
+            existsOrError(password, 'Senha não informada!');
+            existsOrError(active, 'Status não informado!');
+            
+            // TODO: Temos um erro grave de segurança aqui!!!!
+            // A senha não deve ser transportada na edição
+            // A não ser que se deseje alterá-la, mas o ideal era usar uma lógica
+            // que só alteraria a senha se a mesma fosse informada. E nesse caso ela seria criptografada novamente
 
+            // TODO: Falta uma lógica para verificar a duplicidade do código na edição
+            
             //Update nos dados de acordo com o id
             Teacher.update({ 
-                                name: value.name,
-                                code: value.code,
-                                password: value.password,
-                           }, 
-            {
+                name,
+                code,
+                email,
+                password,
+                manager,
+                active
+            }, {
                 where: {
-                  id: value.id
+                    id: id
                 }
-            })
-
-        }catch(err){
-            throw err
+            });
+        } catch(err) {
+            throw err;
         }
     }
 
@@ -113,14 +132,14 @@ module.exports = app => {
     * @param {Valor que será validado} value 
     */
     const index = async () => {
-
-        try{
+        try {
            //Retorna todos os professores
-           return Teacher.findAll()
-        }catch(err){
-            throw err
+           // TODO: Temos um erro grave de segurança aqui!!!!
+           // Está sendo retornado a lista dos professores com suas respectivas senhas
+           return Teacher.findAll();
+        } catch(err) {
+            throw err;
         }
-
     }
 
     /**
@@ -130,15 +149,17 @@ module.exports = app => {
    const show = async (value) => {
         try{
             //Retorna o professor pelo id
+            // TODO: Temos um erro grave de segurança aqui!!!!
+            // Está sendo retornado a lista dos professores com suas respectivas senhas
             return Teacher.findAll({
                 where:{
-                    id:value
+                    id: value
                 }
-            })
-        }catch(err){
-            throw err
+            });
+        } catch(err) {
+            throw err;
         }
     }
 
-    return {store, destroy, show, index, update}
+    return {store, destroy, show, index, update, encryptPassword}
 }

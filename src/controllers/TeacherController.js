@@ -6,14 +6,14 @@ module.exports = app => {
      * @param {response} res 
      */
     const index = async (req, res) => {
-        try{
-            const Teacher = await app.src.services.TeacherService.index()
+        try {
+            const teacher = await app.src.services.TeacherService.index();
 
-            res.send(Teacher)
-        }catch(err){
+            res.send(teacher);
+        } catch(err) {
             res.status(400).send({
                 erro:err
-            })
+            });
         }
     }
 
@@ -23,14 +23,14 @@ module.exports = app => {
      * @param {response} res 
      */
     const show = async (req, res) => {
-        try{
-            const Teacher = await app.src.services.TeacherService.show(req.params.id)
+        try {
+            const teacher = await app.src.services.TeacherService.show(req.params.id);
 
-            res.send(Teacher)
-        }catch(err){
+            res.send(teacher);
+        } catch(err) {
             res.status(400).send({
                 erro:err
-            })
+            });
         }
     }
     
@@ -40,27 +40,25 @@ module.exports = app => {
     * @param {response} res 
     */
     const store = async (req, res) => {
-        try{
+        try {
     
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Teacher = await app.src.services.TeacherService.store(req.body)
+            const teacher = await app.src.services.TeacherService.store(req.body);
 
-            Teacher.password = ''
+            teacher.password = ''
 
             //Retorna o json com status de sucesso para o usuário
-            return res.send(Teacher)
+            return res.send(teacher);
 
-        }catch(err){
+        } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
-                {
-                    status: 400,
-                    name: req.body.name,
-                    code: req.body.code,
-                    password: '',
-                    Erro: err 
-                }
-            )
+            return res.status(400).send({
+                status: 400,
+                name: req.body.name,
+                code: req.body.code,
+                password: '',
+                erro: err 
+            });
         }
     }
     
@@ -70,25 +68,22 @@ module.exports = app => {
     * @param {response} res 
     */
     const update = async (req, res) => {
-        try{
-       
+        try {
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Teacher = await app.src.services.TeacherService.update(req.body)
+            const teacher = await app.src.services.TeacherService.update(req.body);
 
             //Retorna o json com status de sucesso para o usuário
-            return res.send(Teacher)
+            return res.send(teacher);
 
-        }catch(err){
+        } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
-                {
-                    status: 400,
-                    name: req.body.name,
-                    code: req.body.code,
-                    password: '',
-                    Erro: err 
-                }
-            )
+            return res.status(400).send({
+                status: 400,
+                name: req.body.name,
+                code: req.body.code,
+                password: '',
+                erro: err 
+            });
         }
     }
     
@@ -99,21 +94,18 @@ module.exports = app => {
     */
     const destroy = async (req, res) => {
 
-        try{
-            const Teacher = await app.src.services.TeacherService.destroy(req.params.id) 
+        try {
+            const teacher = await app.src.services.TeacherService.destroy(req.params.id);
 
-            res.send(Teacher)
-        }catch(err){
+            res.send(teacher);
+        } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
-                {
-                    status: 400,
-                    Erro: err 
-                }
-            )
+            return res.status(400).send({
+                status: 400,
+                erro: err 
+            });
         }
-
     }
 
-    return {index, show, store, update, destroy}
+    return {index, show, store, update, destroy};
 }
