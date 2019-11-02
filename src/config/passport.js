@@ -14,7 +14,7 @@ module.exports = app => {
         try{
             const teacher = Teacher.findOne({
                 where: {
-                    id:payload
+                    id:payload.id
                 }
             })
             done(null, teacher ? { ...payload } : false)

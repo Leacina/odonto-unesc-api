@@ -18,6 +18,10 @@ module.exports = app => {
             }
         });
         
+        if(!teacher.active){
+            return res.status(400).send('Usuário inativo!');
+        }
+
         if (!teacher) {
             return res.status(400).send('Professor não encontrado!');
         }

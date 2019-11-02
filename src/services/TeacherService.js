@@ -34,15 +34,15 @@ module.exports = app => {
             existsOrError(password, 'Senha não informada!');
             
           
-            //const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
+            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
         
             //Verifica se pode alterar... Somente altera quem se for manager
-            //if(!(_token.type == 'manager') && manager) {
-                //throw {
-                //    erro:'Usuário não possui permissão para cadastro de manager',
-                //    status:403
-                //}
-            //}
+            if(!(_token.type == 'manager') && manager) {
+                throw {
+                    erro:'Usuário não possui permissão para cadastro de manager',
+                    status:403
+                }
+            }
 
             //Criptografa a senha
             const encryptedPassword = encryptPassword(password);
@@ -194,7 +194,7 @@ module.exports = app => {
            const Op = Sequelize.Op 
 
            //Retorna todos os professores
-           return Teacher.findAll({
+           const items = await Teacher.findAll({
                 //Busca os dados com todos os filtros
                 attributes: ['id','name', 'code', 'email', 'manager', 'active'], 
                 where:{
@@ -216,9 +216,16 @@ module.exports = app => {
                     }
                 ]},
                 limit: parseInt(limit) || null,
-                offset: parseInt(page) || null,
+                offset: ((parseInt(page) - 1) * limit) || null,
                 order: [[sort || 'id',order || 'ASC']]
            });
+
+           return {
+               items,
+               page,
+               limit,
+               total: items.length
+           }
         } catch(err) {
             throw err;
         }

@@ -3,7 +3,7 @@ const fs = require('fs');
 module.exports = app => {
     const index = async (req, res) => {
         try {
-            const video = await app.src.services.VideoService.index();
+            const video = await app.src.services.VideoService.index(req.headers, req.query);
 
             res.send(video);
         } catch (err) {
@@ -15,7 +15,7 @@ module.exports = app => {
 
     const show = async (req, res) => {
         try {
-            const video = await app.src.services.VideoService.show(req.params.id);
+            const video = await app.src.services.VideoService.show(req.params.id, req.headers);
 
             res.send(video);
         } catch (err) {
@@ -33,7 +33,7 @@ module.exports = app => {
     const store = async (req, res) => {
         try {
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const video = await app.src.services.VideoService.store(req.body);
+            const video = await app.src.services.VideoService.store(req.body, req.headers);
 
 
             //Retorna o json com status de sucesso para o usuário
@@ -57,7 +57,7 @@ module.exports = app => {
     const update = async (req, res) => {
         try {
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const video = await app.src.services.VideoService.update(req);
+            const video = await app.src.services.VideoService.update(req.body, req.params,req.headers);
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(video);
@@ -79,7 +79,7 @@ module.exports = app => {
 
     const destroy = async (req, res) => {
         try {
-            const video = await app.src.services.VideoService.destroy(req.params.id);
+            const video = await app.src.services.VideoService.destroy(req.params.id, req.headers);
 
             res.send(video);
         } catch (err) {
