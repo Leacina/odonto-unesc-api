@@ -97,7 +97,7 @@ module.exports = app => {
     const destroy = async (req, res) => {
 
         try {
-            const teacher = await app.src.services.TeacherService.destroy(req.params.id);
+            const teacher = await app.src.services.TeacherService.destroy(req.params.id, req.headers);
 
             res.send(teacher);
         } catch(err) {

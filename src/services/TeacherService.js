@@ -83,19 +83,28 @@ module.exports = app => {
      * Valida os dados que serão deletados
      * @param {Valor que será validado} value 
      */
-    const destroy = async (value) => {
+    const destroy = async (id, headers) => {
         try{
+            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
+        
+            //Verifica se pode alterar... Somente altera quem se for manager
+            if((_token.type != 'manager') && (_token.id != id)) {
+                throw {
+                    erro:'Usuário não possui permissão para exclusão',
+                    status:403
+                }
+            }
+
             //Delete o professor
             const rowsDeleted = Teacher.destroy({
                 where:{
-                    id: value
+                    id
                 }
             });
             
             //Caso não encontrar o professor, gera uma exceção
             existsOrError(rowsDeleted, 'Professor não foi encontrado.');
-            
-            return rowsDeleted;
+        
         } catch(err) {
             throw err;
         }
