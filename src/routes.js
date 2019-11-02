@@ -16,9 +16,9 @@ module.exports = app => {
         //.all(app.src.config.passport.authenticate())
         .post(app.src.controllers.TeacherController.store)
         .get(app.src.controllers.TeacherController.index)
-        .put(app.src.controllers.TeacherController.update)
-    app.route(URL + 'teacher/:id')
+        app.route(URL + 'teacher/:id')
         .all(app.src.config.passport.authenticate())
+        .put(app.src.controllers.TeacherController.update)
         .delete(app.src.controllers.TeacherController.destroy)
         .get(app.src.controllers.TeacherController.show)
 

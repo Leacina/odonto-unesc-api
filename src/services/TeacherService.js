@@ -93,7 +93,8 @@ module.exports = app => {
     const update = async (value) => {
         try {   
             
-            const { id, name, active,email, code, manager, password} = value.body;
+            const { id } = value.params;
+            const { name, active,email, code, manager, password} = value.body;
            
             //Verifica se o objeto passado esta correto
             existsOrError(value,'Formato dos dados inválido');
@@ -103,18 +104,19 @@ module.exports = app => {
             existsOrError(name, 'Nome não informado!');
             existsOrError(email, 'Email não informado!');
             existsOrError(code, 'Código não informado!');
-            existsOrError(active, 'Status não informado!');
+            // deve ser permitido alterar status apenas quando for manager
+            // existsOrError(active, 'Status não informado!');
          
             const _token = jwt.decode(value.headers.authorization.replace('Bearer','').trim(), authSecret);
 
-            if(_token.id == id || _token.manager == 'admin') {
+            if(_token.id == id || _token.type == 'manager') {
                 //Se a senha foi passada... Verifica se pode alterar
                 if(password){
                     //Update nos dados de acordo com o id
                     const encryptedPassword = encryptPassword(password);
                     
                     //Retorna professor alterado
-                    return Teacher.update({ name, code, email, password : encryptedPassword, manager, active }, 
+                    return Teacher.update({ name, code, email, password : encryptedPassword, /*manager, active*/ }, 
                     {   
                         where: {
                             id
@@ -123,7 +125,7 @@ module.exports = app => {
                 }//Verifico se é o mesmo usuário logado
                 else{
                     //Se não passou a senha...
-                    return Teacher.update({ name, code, email, manager, active }, 
+                    return Teacher.update({ name, code, email/*, manager, active*/ }, 
                         {   
                             where: {
                                 id
@@ -160,7 +162,7 @@ module.exports = app => {
    const show = async (value) => {
         try{
             //Retorna o professor pelo id
-            return Teacher.findAll({
+            return Teacher.findOne({
                 where:{
                     id: value
                 },
