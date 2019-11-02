@@ -48,9 +48,10 @@ module.exports = app => {
     const destroy = async (value, headers) => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-            const teacherVideo = await show(value)
-
-            if(_token.id != teacherVideo.teacher){
+           
+            const teacherVideo = await show(value, headers)
+        
+            if((_token.id != teacherVideo.teacher) || !teacherVideo){
                 throw {
                     erro:"Usuário não possui permissão para deletar o video",
                     status:403

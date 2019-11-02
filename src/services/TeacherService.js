@@ -193,6 +193,8 @@ module.exports = app => {
            //Utilizado nos filtros
            const Op = Sequelize.Op 
 
+           const itemsTotal = await Teacher.findAll()
+
            //Retorna todos os professores
            const items = await Teacher.findAll({
                 //Busca os dados com todos os filtros
@@ -224,7 +226,7 @@ module.exports = app => {
                items,
                page,
                limit,
-               total: items.length
+               total: itemsTotal.length
            }
         } catch(err) {
             throw err;
