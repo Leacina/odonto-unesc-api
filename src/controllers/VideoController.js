@@ -2,69 +2,94 @@ const fs = require('fs');
 
 module.exports = app => {
     const index = (req, res) => {
-
-    }
-
-    const show = (req, res) => {
-        const { videoName } = req.params;
-        const movieFile = `./upload/video/${videoName}`;
-
-        fs.stat(movieFile, (err, stats) => {
-            if (err) {
-                return res.status(404).end('Vídeo não encontrado');
-            }
-
-            // Variáveis necessárias para montar o chunk header corretamente
-            const { range } = req.headers;
-            const { size } = stats;
-            const start = Number((range || '').replace(/bytes=/, '').split('-')[0]);
-            const end = size - 1;
-            const chunkSize = (end - start) + 1;
-        
-            // Definindo headers de chunk
-            res.set({
-                'Content-Range': `bytes ${start}-${end}/${size}`,
-                'Accept-Ranges': 'bytes',
-                'Content-Length': chunkSize,
-                'Content-Type': 'video/mp4'
-            });
-        
-            // É importante usar status 206 - Partial Content para o streaming funcionar
-            res.status(206)
-        
-            // Utilizando ReadStream do Node.js
-            // Ele vai ler um arquivo e enviá-lo em partes via stream.pipe()
-            const stream = fs.createReadStream(movieFile, { start, end });
-            stream.on('open', () => stream.pipe(res));
-            stream.on('error', (streamErr) => res.end(streamErr));
-        });
-    }
-    
-    const store = async (req, res) => {
         try {
-            //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const video = await app.src.services.VideoService.store(req);
-            const {url} = req.headers
+            const video = await app.src.services.VideoService.index();
 
-            //Upload por stream
-            req.pipe(fs.createWriteStream('upload/video/' + url))
-                .on('finish', function(){
-                return res.status(201).send(video);
-            });
-        } catch(err) {
-            //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send({
-                status: 400,
-                url: req.body.url,
-                is_active: req.body.is_active,
-                erro: err 
+            res.send(video);
+        } catch (err) {
+            res.status(400).send({
+                erro: err
             });
         }
     }
-    
-    const update = (req, res) => {}
-    
-    const destroy = (req, res) => {}
 
-    return {index, show, store, update, destroy}
+    const show = (req, res) => {
+        try {
+            const video = await app.src.services.VideoService.show(req.params.id);
+
+            res.send(video);
+        } catch (err) {
+            res.status(400).send({
+                erro: err
+            });
+        }
+    }
+
+    /**
+    * Comando executado para inserir dado
+    * @param {request} req 
+    * @param {response} res 
+    */
+    const store = async (req, res) => {
+        try {
+            //Valida as regras de negocio e retorna o objeto caso esteja correto
+            const video = await app.src.services.VideoService.store(req.body);
+
+
+            //Retorna o json com status de sucesso para o usuário
+            return res.send(video);
+
+        } catch (err) {
+            //Se houver algum erro, retorna o objeto com a mensagem de erro
+            return res.status(400).send({
+                status: 400,
+                title: req.body.title,
+                description: req.body.description,
+                archive: req.body.archive,
+                shared: req.body.shared,
+                active: req.body.active,
+                teacher: req.body.teacher,
+                erro: err
+            });
+        }
+    }
+
+    const update = (req, res) => {
+        try {
+            //Valida as regras de negocio e retorna o objeto caso esteja correto
+            const video = await app.src.services.VideoService.update(req);
+
+            //Retorna o json com status de sucesso para o usuário
+            return res.send(video);
+
+        } catch (err) {
+            //Se houver algum erro, retorna o objeto com a mensagem de erro
+            return res.status(400).send({
+                status: 400,
+                title: req.body.title,
+                description: req.body.description,
+                archive: req.body.archive,
+                shared: req.body.shared,
+                active: req.body.active,
+                teacher: req.body.teacher,
+                erro: err
+            });
+        }
+    }
+
+    const destroy = (req, res) => {
+        try {
+            const video = await app.src.services.VideoService.destroy(req.params.id);
+
+            res.send(video);
+        } catch (err) {
+            //Se houver algum erro, retorna o objeto com a mensagem de erro
+            return res.status(400).send({
+                status: 400,
+                erro: err
+            });
+        }
+    }
+
+    return { index, show, store, update, destroy }
 }
