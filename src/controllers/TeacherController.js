@@ -72,7 +72,7 @@ module.exports = app => {
     const update = async (req, res) => {
         try {
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const teacher = await app.src.services.TeacherService.update(req.body, req.headers, req.params,req.query);
+            const teacher = await app.src.services.TeacherService.update(req.body, req.headers, req.params);
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(teacher);

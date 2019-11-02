@@ -13,11 +13,11 @@ module.exports = app => {
 
     //Rota para os professores
     app.route(URL + 'teacher')
-        //.all(app.src.config.passport.authenticate())
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.TeacherController.store)
         .get(app.src.controllers.TeacherController.index)   
     app.route(URL + 'teacher/:id')
-        //.all(app.src.config.passport.authenticate())
+        .all(app.src.config.passport.authenticate())
         .delete(app.src.controllers.TeacherController.destroy)
         .put(app.src.controllers.TeacherController.update)
         .get(app.src.controllers.TeacherController.show)
@@ -54,11 +54,12 @@ module.exports = app => {
 
     //Rota para os videos
     app.route(URL + 'video')
-        //.all(app.src.config.passport.authenticate())
+        .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.VideoController.store)
         .get(app.src.controllers.VideoController.index)
+    app.route(URL + 'video/:id')
+        .all(app.src.config.passport.authenticate())
         .put(app.src.controllers.VideoController.update)
-    app.route(URL + 'video/:videoName')
         .delete(app.src.controllers.VideoController.destroy)
         .get(app.src.controllers.VideoController.show)
         

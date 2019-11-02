@@ -33,15 +33,16 @@ module.exports = app => {
             existsOrError(email, 'Email não informado!');
             existsOrError(password, 'Senha não informada!');
             
-            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
-      
+          
+            //const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
+        
             //Verifica se pode alterar... Somente altera quem se for manager
-            if(!(_token.type == 'manager') && manager) {
-                throw {
-                    erro:'Usuário não possui permissão para cadastro de manager',
-                    status:403
-                }
-            }
+            //if(!(_token.type == 'manager') && manager) {
+                //throw {
+                //    erro:'Usuário não possui permissão para cadastro de manager',
+                //    status:403
+                //}
+            //}
 
             //Criptografa a senha
             const encryptedPassword = encryptPassword(password);

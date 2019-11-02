@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 module.exports = app => {
-    const index = (req, res) => {
+    const index = async (req, res) => {
         try {
             const video = await app.src.services.VideoService.index();
 
@@ -13,7 +13,7 @@ module.exports = app => {
         }
     }
 
-    const show = (req, res) => {
+    const show = async (req, res) => {
         try {
             const video = await app.src.services.VideoService.show(req.params.id);
 
@@ -54,7 +54,7 @@ module.exports = app => {
         }
     }
 
-    const update = (req, res) => {
+    const update = async (req, res) => {
         try {
             //Valida as regras de negocio e retorna o objeto caso esteja correto
             const video = await app.src.services.VideoService.update(req);
@@ -77,7 +77,7 @@ module.exports = app => {
         }
     }
 
-    const destroy = (req, res) => {
+    const destroy = async (req, res) => {
         try {
             const video = await app.src.services.VideoService.destroy(req.params.id);
 
