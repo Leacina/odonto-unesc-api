@@ -1,10 +1,14 @@
 module.exports = (sequelize, DataTypes) => {
 
-    //Constanto responsavel por manipular os dados do banco de dados
+    //Constante responsável por manipular os dados do banco de dados
     const Video = sequelize.define('Video', {
-        url: DataTypes.STRING,
-        is_active: DataTypes.BOOLEAN,
-    },{
+        title: DataTypes.STRING,
+        description: DataTypes.STRING,
+        archive: DataTypes.STRING,
+        shared: DataTypes.BOOLEAN,
+        active: DataTypes.BOOLEAN,
+        teacher: DataTypes.INTEGER
+    }, {
         //Adicionado para gerar a tabela no singular
         freezeTableName: true,
     });

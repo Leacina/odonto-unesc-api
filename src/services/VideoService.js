@@ -1,8 +1,22 @@
 const { Video } = require('../models');
-//const bcrypt = require('bcrypt-nodejs')
 
 module.exports = app => {
-    const {existsOrError} = app.src.services.ValidationService;
+    const { existsOrError } = app.src.services.ValidationService;
+
+    /**
+    * Valida os dados que serão retornados
+    * @param {Valor que será validado} value 
+    */
+    const index = async () => {
+        try {
+            //Retorna todos os videos
+            return Video.findAll({
+                attributes: ['id', 'title', 'description', 'archive', 'shared', 'active', 'teacher']
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
 
     /**
      * Valida os dados que serão inseridos
@@ -10,29 +24,30 @@ module.exports = app => {
      */
     const store = async (value) => {
         try {
-            const { url, is_active} = value.headers;
-     
+            const { name, email, code, manager, password, active } = value;
+
             //Verifica se o objeto passado esta correto
             existsOrError(value, 'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
-            existsOrError(url, 'Nome não informado!');
-                  
-            const video = await Video.findOne({
-                where: {
-                    url
-                }
-            });
-
-            if (video) { throw  'Já existe um video com mesmo nome'; }
+            existsOrError(title, 'Título não informado!');
+            existsOrError(description, 'Descrição não informada!');
+            existsOrError(archive, 'Nome do arquivo não informado!');
+            existsOrError(shared, 'Compartilhamento não informado!');
+            existsOrError(active, 'Status não informado!');
+            existsOrError(teacher, 'Professor não informado!');
 
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
             return Video.create({
-                url,
-                is_active
+                title,
+                description,
+                archive,
+                shared,
+                active,
+                teacher
             });
-           
-        } catch(err) {
+
+        } catch (err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
             throw err;
@@ -44,8 +59,21 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const destroy = async (value) => {
-       
+        try {
+            //Deletar video
+            const rowsDeleted = Video.destroy({
+                where: {
+                    id: value
+                }
+            });
 
+            //Caso não encontrar o professor, gera uma exceção
+            existsOrError(rowsDeleted, 'Vídeo não encontrado.');
+
+            return rowsDeleted;
+        } catch (err) {
+            throw err;
+        }
     }
 
     /**
@@ -53,7 +81,36 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const update = async (value) => {
-       
+        try {
+            const { id, title, description, archive, shared, active, teacher } = value.body;
+
+            //Verifica se o objeto passado esta correto
+            existsOrError(value, 'Formato dos dados inválido');
+
+            //Verifica se possui todos os dados foram passados
+            existsOrError(id, 'Campo ID não informado!');
+            existsOrError(title, 'Título não informado!');
+            existsOrError(description, 'Descrição não informada!');
+            existsOrError(archive, 'Nome do arquivo não informado!');
+            existsOrError(shared, 'Compartilhamento não informado!');
+            existsOrError(active, 'Status não informado!');
+            existsOrError(teacher, 'Professor não informado!');
+
+            const _token = jwt.decode(value.headers.authorization.replace('Bearer', '').trim(), authSecret);
+
+            if (_token.id == id || _token.manager == 'admin') {
+                return Video.update({ title, description, archive, shared, active, teacher },
+                    {
+                        where: {
+                            id
+                        }
+                    });
+            } else {
+                throw 'Usuário não possui permissão para alterar os dados!'
+            }
+        } catch (err) {
+            throw err;
+        }
     }
 
     /**
@@ -61,8 +118,18 @@ module.exports = app => {
     * @param {Valor que será validado} value 
     */
     const show = async (value) => {
-        
+        try {
+            //Retorna o video pelo id
+            return Video.findAll({
+                where: {
+                    id: value
+                },
+                attributes: ['id', 'title', 'description', 'archive', 'shared', 'active', 'teacher']
+            });
+        } catch (err) {
+            throw err;
+        }
     }
 
-    return {store, destroy, show, update}
+    return { index, store, destroy, show, update }
 }
