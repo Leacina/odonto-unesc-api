@@ -15,11 +15,11 @@ module.exports = app => {
     app.route(URL + 'teacher')
         //.all(app.src.config.passport.authenticate())
         .post(app.src.controllers.TeacherController.store)
-        .get(app.src.controllers.TeacherController.index)
-        .put(app.src.controllers.TeacherController.update)
+        .get(app.src.controllers.TeacherController.index)   
     app.route(URL + 'teacher/:id')
-        .all(app.src.config.passport.authenticate())
+        //.all(app.src.config.passport.authenticate())
         .delete(app.src.controllers.TeacherController.destroy)
+        .put(app.src.controllers.TeacherController.update)
         .get(app.src.controllers.TeacherController.show)
 
     //Rota para os estudantes

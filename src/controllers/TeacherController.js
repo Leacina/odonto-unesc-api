@@ -7,7 +7,7 @@ module.exports = app => {
      */
     const index = async (req, res) => {
         try {
-            const teacher = await app.src.services.TeacherService.index();
+            const teacher = await app.src.services.TeacherService.index(req.query);
 
             res.send(teacher);
         } catch(err) {
@@ -70,7 +70,7 @@ module.exports = app => {
     const update = async (req, res) => {
         try {
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const teacher = await app.src.services.TeacherService.update(req);
+            const teacher = await app.src.services.TeacherService.update(req.body, req.headers, req.params,req.query);
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(teacher);

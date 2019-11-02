@@ -90,13 +90,14 @@ module.exports = app => {
      * Valida os dados que serão alterados
      * @param {Valor que será validado} value 
      */
-    const update = async (value) => {
+    const update = async (body, headers, params) => {
         try {   
             
-            const { id, name, active,email, code, manager, password} = value.body;
-           
+            const { name, active,email, code, password} = body;
+            const { id } = params
+
             //Verifica se o objeto passado esta correto
-            existsOrError(value,'Formato dos dados inválido');
+            existsOrError(body,'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
             existsOrError(id, 'Campo ID não informado!');
@@ -105,16 +106,25 @@ module.exports = app => {
             existsOrError(code, 'Código não informado!');
             existsOrError(active, 'Status não informado!');
          
-            const _token = jwt.decode(value.headers.authorization.replace('Bearer','').trim(), authSecret);
-
-            if(_token.id == id || _token.manager == 'admin') {
+            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
+          
+            if(_token.id == id || _token.type == 'manager') {
                 //Se a senha foi passada... Verifica se pode alterar
                 if(password){
                     //Update nos dados de acordo com o id
                     const encryptedPassword = encryptPassword(password);
-                    
+                    var teacher
+
+                    if (_token.type == 'manager'){
+                        //TODO: Verificar se passou manager e retornar erro
+
+                        teacher = { name, code, email, password : encryptedPassword, manager, active }
+                    }else{
+                        teacher = { name, code, email, password : encryptedPassword } 
+                    }
+                
                     //Retorna professor alterado
-                    return Teacher.update({ name, code, email, password : encryptedPassword, manager, active }, 
+                    return Teacher.update(teacher, 
                     {   
                         where: {
                             id
@@ -123,12 +133,12 @@ module.exports = app => {
                 }//Verifico se é o mesmo usuário logado
                 else{
                     //Se não passou a senha...
-                    return Teacher.update({ name, code, email, manager, active }, 
+                    return Teacher.update({ name, code, email}, 
                         {   
                             where: {
                                 id
                             }
-                        }); 
+                        });
                 }
             }else{
                 throw 'Usuário não possui permissão para alterar a senha!'
@@ -142,12 +152,26 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-    const index = async () => {
+    const index = async (query) => {
         try {
+           const { sort, order, page, limit, search } = query     
+
            //Retorna todos os professores
            return Teacher.findAll({
-            attributes: ['id','name', 'code', 'email', 'manager', 'active']
-          });
+                attributes: ['id','name', 'code', 'email', 'manager', 'active'], 
+                limit: parseInt(limit) || null,
+                offset: parseInt(page) || null, 
+                order: [[order || 'id','ASC']],
+                //TODO: Ajustar Where
+                /*
+                where: {
+                    [Op.or]: [
+                      { name: { [Op.ilike]: '%someval%' } },
+                      { code: { [Op.ilike]: '%someval%' } }
+                    ]
+                  }
+                */
+           });
         } catch(err) {
             throw err;
         }
@@ -160,7 +184,7 @@ module.exports = app => {
    const show = async (value) => {
         try{
             //Retorna o professor pelo id
-            return Teacher.findAll({
+            return Teacher.findOne({
                 where:{
                     id: value
                 },
