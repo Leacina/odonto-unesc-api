@@ -11,8 +11,9 @@ module.exports = app => {
 
             res.send(Student)
         }catch(err){
-            res.status(400).send({
-                erro:err
+            res.status(err.status || 400).send({
+                status:err.status || 400,
+                detalhes:err
             })
         }
     }
@@ -28,8 +29,9 @@ module.exports = app => {
 
             res.send(Student)
         }catch(err){
-            res.status(400).send({
-                erro:err
+            res.status(err.status || 400).send({
+                status:err.status || 400,
+                detalhes:err
             })
         }
     }
@@ -50,12 +52,12 @@ module.exports = app => {
 
         }catch(err){
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
+            return res.status(err.status || 400).send(
                 {
                     status: 400,
                     name: req.body.name,
                     code: req.body.code,
-                    Erro: err 
+                    detalhes: err.status || 400, 
                 }
             )
         }
@@ -77,12 +79,12 @@ module.exports = app => {
 
         }catch(err){
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
+            return res.status(err.status || 400).send(
                 {
-                    status: 400,
+                    status: err.status || 400,
                     name: req.body.name,
                     code: req.body.code,
-                    Erro: err 
+                    detalhes: err 
                 }
             )
         }
@@ -101,10 +103,10 @@ module.exports = app => {
             res.send(Student)
         }catch(err){
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
+            return res.status(err.status || 400).send(
                 {
-                    status: 400,
-                    Erro: err 
+                    status: err.status || 400,
+                    detalhes: err 
                 }
             )
         }

@@ -105,7 +105,7 @@ module.exports = app => {
    const show = async (value) => {
         try{
             //Retorna o estudante pelo id
-            return Student.findAll({
+            return Student.findOne({
                 where:{
                     id:value
                 }

@@ -107,7 +107,7 @@ module.exports = app => {
    const show = async (value) => {
         try{
             //Retorna o caso pelo id
-            return Case.findAll({
+            return Case.findOne({
                 where:{
                     id:value
                 }

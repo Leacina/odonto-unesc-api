@@ -11,8 +11,9 @@ module.exports = app => {
 
             res.send(teacher);
         } catch(err) {
-            res.status(400).send({
-                erro:err
+            res.status(err.status || 400).send({
+                status:err.status || 400,
+                detalhes:err
             });
         }
     }
@@ -28,8 +29,9 @@ module.exports = app => {
 
             res.send(teacher);
         } catch(err) {
-            res.status(400).send({
-                erro:err
+            res.status(err.status || 400,).send({
+                status:err.status || 400,
+                detalhes:err
             });
         }
     }
@@ -43,7 +45,7 @@ module.exports = app => {
         try {
     
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const teacher = await app.src.services.TeacherService.store(req.body);
+            const teacher = await app.src.services.TeacherService.store(req.body, req.headers);
 
             teacher.password = ''
 
@@ -52,12 +54,12 @@ module.exports = app => {
 
         } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send({
-                status: 400,
+            return res.status(err.status || 400).send({
+                status: err.status || 400,
                 name: req.body.name,
                 code: req.body.code,
                 password: '',
-                erro: err 
+                detalhes: err 
             });
         }
     }
@@ -77,12 +79,12 @@ module.exports = app => {
 
         } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send({
-                status: 400,
+            return res.status(err.status || 400).send({
+                status: err.status || 400,
                 name: req.body.name,
                 code: req.body.code,
                 password: '',
-                erro: err 
+                detalhes: err
             });
         }
     }
@@ -100,9 +102,9 @@ module.exports = app => {
             res.send(teacher);
         } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send({
-                status: 400,
-                erro: err 
+            return res.status(err.status || 400).send({
+                status: err.status || 400,
+                detalhes: err
             });
         }
     }

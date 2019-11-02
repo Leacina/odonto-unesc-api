@@ -2,6 +2,7 @@ const { Teacher } = require('../models');
 const { authSecret } = require('../.env')
 const jwt = require('jwt-simple')
 const bcrypt = require('bcrypt-nodejs')
+const Sequelize = require('sequelize')
 
 module.exports = app => {
     const {existsOrError} = app.src.services.ValidationService;
@@ -19,30 +20,45 @@ module.exports = app => {
      * Valida os dados que serão inseridos
      * @param {Valor que será validado} value 
      */
-    const store = async (value) => {
+    const store = async (body, headers) => {
         try {
-            const { name, email, code, manager, password, active } = value;
+            const { name, email, code, manager, password, active } = body;
 
             //Verifica se o objeto passado esta correto
-            existsOrError(value, 'Formato dos dados inválido');
+            existsOrError(body, 'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
             existsOrError(name, 'Nome não informado!');
             existsOrError(code, 'Código não informado!');
             existsOrError(email, 'Email não informado!');
             existsOrError(password, 'Senha não informada!');
-            existsOrError(active, 'Status não informado!');
             
+            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
+      
+            //Verifica se pode alterar... Somente altera quem se for manager
+            if(!(_token.type == 'manager') && manager) {
+                throw {
+                    erro:'Usuário não possui permissão para cadastro de manager',
+                    status:403
+                }
+            }
+
+            //Criptografa a senha
             const encryptedPassword = encryptPassword(password);
-          
+            
+            //Busca o professor caso ja exista
             const teacher = await Teacher.findOne({
                 where: {
                     code
                 }
             });
 
+            //Se existir... Lança exceção
             if (teacher) {
-                throw  'Já existe um professor com mesmo código';
+                throw  {
+                            erro:'Já existe um professor com mesmo código',
+                            status:400
+                };
             }
 
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
@@ -75,7 +91,7 @@ module.exports = app => {
                     id: value
                 }
             });
-          
+            
             //Caso não encontrar o professor, gera uma exceção
             existsOrError(rowsDeleted, 'Professor não foi encontrado.');
             
@@ -93,7 +109,7 @@ module.exports = app => {
     const update = async (body, headers, params) => {
         try {   
             
-            const { name, active,email, code, password} = body;
+            const { name, active, email, code, password, manager} = body;
             const { id } = params
 
             //Verifica se o objeto passado esta correto
@@ -104,25 +120,27 @@ module.exports = app => {
             existsOrError(name, 'Nome não informado!');
             existsOrError(email, 'Email não informado!');
             existsOrError(code, 'Código não informado!');
-            existsOrError(active, 'Status não informado!');
-         
+            
             const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
           
             if(_token.id == id || _token.type == 'manager') {
+                
+                if(!(_token.type == 'manager') && ((typeof manager !== 'undefined') || (typeof active !== 'undefined'))){
+                    throw   {
+                                erro:'Você não possui permissão para alterar campos manager/active',
+                                status:403
+                            }
+                }
+
+                var teacher
+
                 //Se a senha foi passada... Verifica se pode alterar
                 if(password){
                     //Update nos dados de acordo com o id
-                    const encryptedPassword = encryptPassword(password);
-                    var teacher
+                    const encryptedPassword = encryptPassword(password)
+            
+                    teacher = { name, code, email, password : encryptedPassword, manager, active }
 
-                    if (_token.type == 'manager'){
-                        //TODO: Verificar se passou manager e retornar erro
-
-                        teacher = { name, code, email, password : encryptedPassword, manager, active }
-                    }else{
-                        teacher = { name, code, email, password : encryptedPassword } 
-                    }
-                
                     //Retorna professor alterado
                     return Teacher.update(teacher, 
                     {   
@@ -132,6 +150,8 @@ module.exports = app => {
                     }); 
                 }//Verifico se é o mesmo usuário logado
                 else{
+                    teacher = { name, code, email, manager, active }
+                
                     //Se não passou a senha...
                     return Teacher.update({ name, code, email}, 
                         {   
@@ -141,7 +161,10 @@ module.exports = app => {
                         });
                 }
             }else{
-                throw 'Usuário não possui permissão para alterar a senha!'
+                throw   {
+                            erro:'Usuário não possui permissão para alterar os dados!',
+                            status:403
+                        }
             }     
         } catch(err) {
             throw err;
@@ -154,23 +177,37 @@ module.exports = app => {
     */
     const index = async (query) => {
         try {
+           //Pega os dados para filtros 
            const { sort, order, page, limit, search } = query     
+            
+           //Utilizado nos filtros
+           const Op = Sequelize.Op 
 
            //Retorna todos os professores
            return Teacher.findAll({
+                //Busca os dados com todos os filtros
                 attributes: ['id','name', 'code', 'email', 'manager', 'active'], 
+                where:{
+                [Op.or]: [
+                    {
+                        name: {
+                            [Op.like]: `%${search || ''}%`
+                        }
+                    },
+                    {
+                        code: {
+                            [Op.like]: `%${search || ''}%`
+                        }
+                    },
+                    {
+                        email:{
+                            [Op.like]: `%${search || ''}%`  
+                        }
+                    }
+                ]},
                 limit: parseInt(limit) || null,
-                offset: parseInt(page) || null, 
-                order: [[order || 'id','ASC']],
-                //TODO: Ajustar Where
-                /*
-                where: {
-                    [Op.or]: [
-                      { name: { [Op.ilike]: '%someval%' } },
-                      { code: { [Op.ilike]: '%someval%' } }
-                    ]
-                  }
-                */
+                offset: parseInt(page) || null,
+                order: [[sort || 'id',order || 'ASC']]
            });
         } catch(err) {
             throw err;

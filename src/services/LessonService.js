@@ -112,7 +112,7 @@ module.exports = app => {
    const show = async (value) => {
         try{
             //Retorna a lição pelo id
-            return Lesson.findAll({
+            return Lesson.findOne({
                 where:{
                     id:value
                 }
