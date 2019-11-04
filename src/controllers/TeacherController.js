@@ -13,7 +13,7 @@ module.exports = app => {
         } catch(err) {
             res.status(err.status || 400).send({
                 status:err.status || 400,
-                detalhes:err
+                details:err
             });
         }
     }
@@ -31,7 +31,7 @@ module.exports = app => {
         } catch(err) {
             res.status(err.status || 400,).send({
                 status:err.status || 400,
-                detalhes:err
+                details:err
             });
         }
     }
@@ -59,7 +59,7 @@ module.exports = app => {
                 name: req.body.name,
                 code: req.body.code,
                 password: '',
-                detalhes: err 
+                details: err 
             });
         }
     }
@@ -84,7 +84,7 @@ module.exports = app => {
                 name: req.body.name,
                 code: req.body.code,
                 password: '',
-                detalhes: err
+                details: err
             });
         }
     }
@@ -104,7 +104,7 @@ module.exports = app => {
             //Se houver algum erro, retorna o objeto com a mensagem de erro
             return res.status(err.status || 400).send({
                 status: err.status || 400,
-                detalhes: err
+                details: err
             });
         }
     }

@@ -22,7 +22,11 @@ module.exports = app => {
      */
     const store = async (body, headers) => {
         try {
-            const { name, email, code, manager, password, active } = body;
+            const { name, email, code, password} = body;
+
+            //Validações de campo null
+            const manager = body.manager == null ? false : body.manager
+            const active = body.active == null ? false : body.active
 
             //Verifica se o objeto passado esta correto
             existsOrError(body, 'Formato dos dados inválido');
@@ -119,7 +123,12 @@ module.exports = app => {
     const update = async (body, headers, params) => {
         try {   
             
-            const { name, active, email, code, password, manager} = body;
+            const { name, email, code, password} = body;
+
+            //Validações de campo null
+            const manager = body.manager == null ? false : body.manager
+            const active = body.active == null ? false : body.active
+
             const { id } = params
 
             //Verifica se o objeto passado esta correto
@@ -183,7 +192,7 @@ module.exports = app => {
 
     /**
     * Valida os dados que serão retornados
-    * @param {Valor que será validado} value 
+    * @param {Valor que será validado} query 
     */
     const index = async (query) => {
         try {
