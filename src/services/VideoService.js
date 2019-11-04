@@ -49,8 +49,12 @@ module.exports = app => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
            
-            const teacherVideo = await show(value, headers)
-        
+            const teacherVideo =  await Video.findOne({
+                where: {
+                    id: value,
+                 
+                }})
+
             if((_token.id != teacherVideo.teacher) || !teacherVideo){
                 throw {
                     erro:"Usuário não possui permissão para deletar o video",
@@ -97,8 +101,12 @@ module.exports = app => {
                     status:403
                 }
             }
-    
-            const teacherVideo = await show(id)
+            
+            const teacherVideo = await Video.findOne({
+                where: {
+                    id,
+                }
+            })  
 
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
 
@@ -109,7 +117,7 @@ module.exports = app => {
                 }
             }
           
-            return Video.update({ title, description, archive, shared, active },
+            return await Video.update({ title, description, archive, shared, active },
                 {
                     where: {
                         id
@@ -128,9 +136,9 @@ module.exports = app => {
     const show = async (value, headers) => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-
+            
             //Retorna o video pelo id
-            return Video.findOne({
+            return await Video.findOne({
                 where: {
                     id: value,
                     teacher:_token.id
@@ -154,9 +162,11 @@ module.exports = app => {
 
             //Utilizado nos filtros
             const Op = Sequelize.Op
-
+            
+            //const itemsTotal = await Video.findAll()
+       
             //Retorna todos os videos
-            return await Video.findAll({
+            const items = await Video.findAll({
                 where:{
                     [Op.and]:[
                         {
@@ -191,9 +201,17 @@ module.exports = app => {
                     ]
                 },
                 limit: parseInt(limit) || null,
-                offset: parseInt(page) || null,
+                offset: ((parseInt(page) - 1) * limit) || null,
                 order: [[sort || 'id',order || 'ASC']]
             });
+            
+            return {
+                items,
+                page,
+                limit,
+                total: items.length
+            }
+
         } catch (err) {
             throw err;
         }
