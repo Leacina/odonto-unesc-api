@@ -52,7 +52,6 @@ module.exports = app => {
             const teacherVideo =  await Video.findOne({
                 where: {
                     id: value,
-                 
                 }})
 
             if((_token.id != teacherVideo.teacher) || !teacherVideo){
@@ -157,7 +156,7 @@ module.exports = app => {
         try {
             //Pega os dados para filtros
             const { sort, order, page, limit, search } = query   
-       
+            
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
 
             //Utilizado nos filtros

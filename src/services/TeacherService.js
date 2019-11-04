@@ -152,7 +152,7 @@ module.exports = app => {
                     teacher = { name, code, email, password : encryptedPassword, manager, active }
 
                     //Retorna professor alterado
-                    return Teacher.update(teacher, 
+                    return await Teacher.update(teacher, 
                     {   
                         where: {
                             id
@@ -161,9 +161,9 @@ module.exports = app => {
                 }//Verifico se é o mesmo usuário logado
                 else{
                     teacher = { name, code, email, manager, active }
-                
+          
                     //Se não passou a senha...
-                    return Teacher.update({ name, code, email}, 
+                    return await Teacher.update(teacher, 
                         {   
                             where: {
                                 id
