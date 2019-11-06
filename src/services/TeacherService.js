@@ -201,8 +201,19 @@ module.exports = app => {
             
            //Utilizado nos filtros
            const Op = Sequelize.Op 
-
-           //const itemsTotal = await Teacher.findAll()
+            
+           //Faz o split para pegar todos os order e sort
+           var sortArray = sort ? sort.split(',') : []
+           var orderArray = order ? order.split(',') : []
+     
+           //Variavel para armezar o array de order e sort
+           let _order = []; 
+          
+           //Percorre todos os 'order'
+           for(let i = 0; i < order.length - 1; i++){
+                //Acumulador do order by
+                _order[i] =  [(sortArray[i] || 'id') , (orderArray[i] || 'ASC')] 
+           }
 
            //Retorna todos os professores
            const items = await Teacher.findAll({
@@ -228,7 +239,7 @@ module.exports = app => {
                 ]},
                 limit: parseInt(limit) || null,
                 offset: ((parseInt(page) - 1) * limit) || null,
-                order: [[sort || 'id',order || 'ASC']]
+                order: _order
            });
 
            return {

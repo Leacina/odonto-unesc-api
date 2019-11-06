@@ -41,7 +41,7 @@ module.exports = app => {
             code: teacher.code,
             type: authType,
             issued_at: now,
-            expire_at: now + (60 * 60 * 24 * 3)
+            expire_at: now + (60 * 60 * 2)
         };
 
         return res.json({
