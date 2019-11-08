@@ -42,13 +42,10 @@ module.exports = app => {
     
     const store = async (req, res) => {
         try {
-            
-            const {url} = req.headers
-          
             //Upload por stream
-            req.pipe(fs.createWriteStream('upload/video/' + url))
+            req.pipe(fs.createWriteStream('upload/video/' + 'video15456'))
                 .on('finish', function(){
-                return res.status(201).send(video);
+                return res.status(201).send('sasa');
             });
         } catch(err) {
             //Se houver algum erro, retorna o objeto com a mensagem de erro

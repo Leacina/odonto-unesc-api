@@ -12,8 +12,8 @@ module.exports = app => {
      */
     const store = async (value, headers) => {
         try {
-            const { title, description, archive, shared, active, teacher } = value;
-
+            const { title, description, archive, active, teacher } = value;
+            const shared = body.shared == null ? false : body.shared
             //Verifica se o objeto passado esta correto
             existsOrError(value, 'Formato dos dados inválido');
 
@@ -82,9 +82,10 @@ module.exports = app => {
      */
     const update = async (body, params,headers) => {
         try {
-            const { title, description, archive, shared, active, teacher } = body;
+            const { title, description, archive, active, teacher } = value;
             const { id } = params
-         
+            const shared = body.shared == null ? false : body.shared
+            
             //Verifica se o objeto passado esta correto
             existsOrError(body, 'Formato dos dados inválido');
 
