@@ -41,21 +41,8 @@ module.exports = app => {
     }
     
     const store = async (req, res) => {
-        try {
-            //Upload por stream
-            req.pipe(fs.createWriteStream('upload/video/' + 'video15456'))
-                .on('finish', function(){
-                return res.status(201).send('sasa');
-            });
-        } catch(err) {
-            //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send({
-                status: 400,
-                url: req.body.url,
-                is_active: req.body.is_active,
-                erro: err 
-            });
-        }
+        const files = req.files;
+        res.json({ message: files });
     }
     
     const update = (req, res) => {}

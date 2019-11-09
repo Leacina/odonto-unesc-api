@@ -2,6 +2,8 @@ const URL = '/api/'
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('../swagger.json')
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart({ uploadDir: './upload/video' });
 
 /**
  * Rotas acessando os métodos dos Controllers
@@ -66,7 +68,7 @@ module.exports = app => {
         //Rota para os videos
     app.route(URL + 'upload/video')
         .all(app.src.config.passport.authenticate())
-        .post(app.src.controllers.StreamController.store)
+        .post(multipartMiddleware,app.src.controllers.StreamController.store)
         .get(app.src.controllers.StreamController.index)
     app.route(URL + 'upload/video/:id')
          .all(app.src.config.passport.authenticate())
