@@ -82,18 +82,18 @@ module.exports = app => {
      */
     const update = async (body, params,headers) => {
         try {
-            const { title, description, archive, active, teacher } = value;
+            const { title, description, archive, active, teacher } = body;
             const { id } = params
             const shared = body.shared == null ? false : body.shared
-            
+
             //Verifica se o objeto passado esta correto
             existsOrError(body, 'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
             existsOrError(id, 'Campo ID não informado!');
-            existsOrError(title, 'Título não informado!');
-            existsOrError(description, 'Descrição não informada!');
-            existsOrError(archive, 'Nome do arquivo não informado!');
+            //existsOrError(title, 'Título não informado!');
+            //existsOrError(description, 'Descrição não informada!');
+            //existsOrError(archive, 'Nome do arquivo não informado!');
            
             if(teacher){
                 throw {
@@ -164,18 +164,20 @@ module.exports = app => {
             const Op = Sequelize.Op
             
             //Faz o split para pegar todos os order e sort
-            var sortArray = sort ? sort.split(',') : []
-            var orderArray = order ? order.split(',') : []
+            var sortArray = sort ? sort.split(',') : ['id']
+            var orderArray = order ? order.split(',') : ['ASC']
      
             //Variavel para armezar o array de order e sort
             let _order = []; 
-          
+            
             //Percorre todos os 'order'
-            for(let i = 0; i < order.length - 1; i++){
+            for(let i = 0; i < sortArray.length - 1; i++){
                  //Acumulador do order by
                  _order[i] =  [(sortArray[i] || 'id') , (orderArray[i] || 'ASC')] 
             }
        
+        
+
             //Retorna todos os videos
             const items = await Video.findAll({
                 where:{
@@ -213,7 +215,7 @@ module.exports = app => {
                 },
                 limit: parseInt(limit) || null,
                 offset: ((parseInt(page) - 1) * limit) || null,
-                order: _order
+                order: _order || ['id','ASC']
             });
             
             return {

@@ -42,7 +42,9 @@ module.exports = app => {
     
     const store = async (req, res) => {
         const files = req.files;
-        res.json({ message: files });
+        console.log('ENTROU')
+        console.log(files)
+        res.send({ message: files });
     }
     
     const update = (req, res) => {}
