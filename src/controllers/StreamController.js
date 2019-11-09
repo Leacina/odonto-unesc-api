@@ -42,7 +42,7 @@ module.exports = app => {
     
     const store = async (req, res) => {
         const files = req.files;
-        res.json({ message: files });
+        res.send({ message: files.file.path.substring(11) });
     }
     
     const update = (req, res) => {}
