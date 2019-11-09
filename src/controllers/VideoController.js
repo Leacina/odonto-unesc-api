@@ -49,7 +49,7 @@ module.exports = app => {
                 shared: req.body.shared,
                 active: req.body.active,
                 teacher: req.body.teacher,
-                erro: err
+                details: err
             });
         }
     }
@@ -72,7 +72,7 @@ module.exports = app => {
                 shared: req.body.shared,
                 active: req.body.active,
                 teacher: req.body.teacher,
-                erro: err
+                details: err
             });
         }
     }

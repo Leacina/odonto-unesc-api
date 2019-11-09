@@ -43,7 +43,7 @@ module.exports = app => {
     const store = async (req, res) => {
         const files = req.files;
 
-        res.send({ message: files.file.path.substring(11) });
+        res.send({ message: files.file.path.substring(13)});
 
     }
     
