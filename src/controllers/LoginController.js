@@ -8,7 +8,10 @@ module.exports = app => {
         const { code, password } = req.body;
 
         if (!code || !password) {
-            return res.status(400).send('Informe seu código e senha!');
+            return res.status(400).send({
+                erro:'Informe seu código e senha!',
+                status:400
+            });
         }
         
         // TODO: Usar um método em um serviço em vez de usar o model diretamente no controller 
@@ -19,17 +22,26 @@ module.exports = app => {
         });
         
         if(!teacher.active){
-            return res.status(400).send('Usuário inativo!');
+            return res.status(400).send({
+                erro:'Usuário inativo!',
+                status:400
+            });
         }
 
         if (!teacher) {
-            return res.status(400).send('Professor não encontrado!');
+            return res.status(400).send({
+                erro:'Professor não encontrado!',
+                status:400
+            });
         }
 
         const isMatch = bcrypt.compareSync(password, teacher.password);
 
         if (!isMatch) {
-            return res.status(401).send('Código e/ou Senha inválidos!') ;
+            return res.status(401).send({
+                erro:'Código e/ou Senha inválidos!',
+                status:401
+            }) ;
         }
         
         const now = Math.floor(Date.now() / 1000);

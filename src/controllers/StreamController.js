@@ -41,10 +41,15 @@ module.exports = app => {
     }
     
     const store = async (req, res) => {
-        const files = req.files;
-
-        res.send({ message: files.file.path.substring(13)});
-
+        try {
+            const files = req.files;
+            res.send({ message: files.file.path.substring(13)});
+        } catch (error) {
+            res.status(400).send({
+                erro : error,
+                status : 400
+            })
+        }
     }
     
     const update = (req, res) => {}

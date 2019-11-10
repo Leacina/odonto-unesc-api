@@ -15,7 +15,7 @@ module.exports = app => {
 
     const show = async (req, res) => {
         try {
-            const video = await app.src.services.VideoService.show(req.params.id, req.headers);
+            const video = await app.src.services.VideoService.show(req.params.id, req.query, req.headers);
 
             res.send(video);
         } catch (err) {

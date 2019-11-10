@@ -7,7 +7,7 @@ module.exports = app => {
      */
     const index = async (req, res) => {
         try{
-            const Case = await app.src.services.CaseService.index()
+            const Case = await app.src.services.CaseService.index(req.headers, req.query);
 
             res.send(Case)
         }catch(err){
@@ -24,12 +24,12 @@ module.exports = app => {
      */
     const show = async (req, res) => {
         try{
-            const Case = await app.src.services.CaseService.show(req.params.id)
+            const Case = await app.src.services.CaseService.show(req.params.id, req.query, req.headers);
 
             res.send(Case)
         }catch(err){
             res.status(400).send({
-                erro:err
+                details:err
             })
         }
     }
@@ -43,7 +43,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Case = await app.src.services.CaseService.store(req.body)
+            const Case = await app.src.services.CaseService.store(req.body, req.headers);
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Case)
@@ -53,10 +53,10 @@ module.exports = app => {
             return res.status(400).send(
                 {
                     status: 400,
-                    name: req.body.name,
+                    title: req.body.title,
                     description: req.body.description,
-                    id_teacher: req.body.id_teacher,
-                    Erro: err  
+                    teacher: req.body.teacher,
+                    details: err  
                 }
             )
         }
@@ -71,7 +71,7 @@ module.exports = app => {
         try{
             
             //Valida as regras de negocio e retorna o objeto caso esteja correto
-            const Case = await app.src.services.CaseService.update(req.body)
+            const Case = await app.src.services.CaseService.update(req.body, req.params,req.headers);
 
             //Retorna o json com status de sucesso para o usuário
             return res.send(Case)
@@ -84,7 +84,7 @@ module.exports = app => {
                     name: req.body.name,
                     description: req.body.description,
                     id_teacher: req.body.id_teacher,
-                    Erro: err 
+                    details: err 
                 }
             )
         }
@@ -98,7 +98,7 @@ module.exports = app => {
     const destroy = async (req, res) => {
 
         try{
-            const Case = await app.src.services.CaseService.destroy(req.params.id) 
+            const Case = await app.src.services.CaseService.destroy(req.params.id, req.headers); 
 
             res.send(Case)
         }catch(err){
@@ -106,7 +106,7 @@ module.exports = app => {
             return res.status(400).send(
                 {
                     status: 400,
-                    Erro: err 
+                    details: err 
                 }
             )
         }

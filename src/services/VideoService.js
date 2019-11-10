@@ -1,5 +1,5 @@
 const { authSecret } = require('../.env')
-const { Video } = require('../models');
+const { Video, Teacher } = require('../models');
 const jwt = require('jwt-simple')
 const Sequelize = require('sequelize')
 
@@ -148,19 +148,58 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-    const show = async (value, headers) => {
+    const show = async (value, query, headers) => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
             
             //Retorna o video pelo id
-            return await Video.findOne({
+            const video  = await Video.findOne({
                 where: {
                     id: value,
                     teacher:_token.id
                 }
             });
+          
+            const { id, title, description, archive,shared,active, teacher, createdAt, updatedAt} = video
+
+            //variaveis para controle da query expand
+            var {expand} = query
+            var objectTeacher;
+
+            //Monta o Objeto professor de acordo com o expand passado na query
+            if(expand){
+                expand = expand.split(',')
+
+                //Se possuir expand para teacher, busca o cara
+                if(expand.indexOf('teacher') > -1){
+                    objectTeacher = await Teacher.findOne({
+                        where:{
+                            id : teacher
+                        },
+                        attributes: { exclude: ['password'] }
+                    })
+                }
+            }
+
+            //Retorna o JSON separado para controlar os dados do professor
+            return {
+                id,
+                title,
+                description,
+                archive,
+                shared,
+                active,
+                createdAt,
+                updatedAt,
+                teacher:
+                    objectTeacher ? objectTeacher : { id: teacher }
+                
+            }
         } catch (err) {
-            throw err;
+            throw {
+                erro: err,
+                status:400
+            };
         }
     }
 
@@ -191,8 +230,6 @@ module.exports = app => {
                  _order[i] =  [(sortArray[i] || 'id') , (orderArray[i] || 'ASC')] 
             }
        
-        
-
             //Retorna todos os videos
             const items = await Video.findAll({
                 where:{
@@ -232,9 +269,49 @@ module.exports = app => {
                 offset: ((parseInt(page) - 1) * limit) || null,
                 order: _order || ['id','ASC']
             });
+
+           
+            //TODO: Uma gambi provisória... Ajustar modo para poderem utilizar o expand
+            //Tentar utilizar isso no proprio sequelize
+            var _items = [];
+            for(let i = 0; i < items.length - 1; i++){
+                const { id, title, description, archive,shared,active, teacher, createdAt, updatedAt} = items[i]
+              
+                //variaveis para controle da query expand
+                var {expand} = query
+                var objectTeacher;
+                console.log(teacher)
+                //Monta o Objeto professor de acordo com o expand passado na query
+                if(expand){
+                    expand = expand.split(',')
+
+                    //Se possuir expand para teacher, busca o cara
+                    if(expand.indexOf('teacher') > -1){
+                        objectTeacher = await Teacher.findOne({
+                            where:{
+                                id : teacher
+                            },
+                            attributes: { exclude: ['password'] }
+                        })
+                    }
+                }
             
+                _items[i] = { id,
+                    title,
+                    description,
+                    archive,
+                    shared,
+                    active,
+                    createdAt,
+                    updatedAt,
+                    teacher:
+                        objectTeacher ? objectTeacher : { id: teacher }} 
+
+                       // console.log(video)
+            };
+
             return {
-                items,
+                items : _items,
                 page,
                 limit,
                 total: items.length
