@@ -8,14 +8,16 @@ module.exports = app => {
 
     /**
      * Valida os dados que serão inseridos
-     * @param {Valor que será validado} value 
+     * @param {Valor que será validado} body 
      */
-    const store = async (value, headers) => {
+    const store = async (body, headers) => {
         try {
-            const { title, description, archive, active, teacher } = value;
+            const { title, description, archive, active} = body;
+            
             const shared = body.shared == null ? false : body.shared
+        
             //Verifica se o objeto passado esta correto
-            existsOrError(value, 'Formato dos dados inválido');
+            existsOrError(body, 'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
             existsOrError(title, 'Título não informado!');
@@ -23,6 +25,19 @@ module.exports = app => {
             existsOrError(archive, 'Nome do arquivo não informado!');
             
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
+
+            const _video = await Video.findOne({
+                where:{
+                    archive
+                }
+            })
+
+            if(_video){
+                throw {
+                    erro:"Já possui um arquivo com esse nome!",
+                    status:403
+                }
+            }
 
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
             return Video.create({
