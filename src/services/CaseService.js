@@ -1,7 +1,7 @@
 const { authSecret } = require('../.env')
 const jwt = require('jwt-simple')
 const Sequelize = require('sequelize')
-const { Case, VideoCase, Video } = require('../models');
+const { Case, Video_Case, Video } = require('../models');
 
 module.exports = app => {
     const {existsOrError} = app.src.services.ValidationService;
@@ -28,7 +28,7 @@ module.exports = app => {
             existsOrError(description,'Descrição não informada!')
            
             var _case
-            _case = await Case.findOne({
+            _case = await Case.findOne({ 
                 where:{
                     title
                 }
@@ -47,26 +47,31 @@ module.exports = app => {
                 shared,
                 teacher:_token.id
             })
-
-            //Insere na tabela de video
-            videos.forEach(async video => {
+           
+            //Percorre todos os videos para cadastro
+            for(let i = 0; i < videos.length - 1; i++){
+                //Busca o professor do video para verificar se possui permissão
                 const teacherVideo =  await Video.findOne({
                     where: {
-                        id: video,
-                    }})
-                  
+                        id: videos[i],
+                    }
+                })
+                
+                //Se não tem permissão
                 if((_token.id != teacherVideo.teacher) || !teacherVideo){
+                 
                     throw {
                         erro:"Usuário não possui permissão para deletar o video",
                         status:403
                     }
                 }
-               
-                VideoCase.create({
-                    id_video : video,
+             
+                //Insere o video
+                Video_Case.create({
+                    id_video : videos[i],
                     id_case : _case.id
                 })
-            });
+            }
 
             return _case
            
@@ -85,6 +90,20 @@ module.exports = app => {
     const destroy = async (value, headers) => {
 
         try{
+            const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
+           
+            const teacherVideo =  await Video.findOne({
+                where: {
+                    id: value,
+                }})
+
+            if((_token.id != teacherVideo.teacher) || !teacherVideo){
+                throw {
+                    erro:"Usuário não possui permissão para deletar o caso",
+                    status:403
+                }
+            }
+
             //Delete o caso
             const rowsDeleted = Case.destroy({
                 where:{
