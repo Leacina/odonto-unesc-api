@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt-nodejs')
 const Sequelize = require('sequelize')
 
 module.exports = app => {
-    const {existsOrError} = app.src.services.ValidationService;
+    const { existsOrError } = app.src.services.ValidationService;
 
     /**
      * Responsavel por criptografar as senhas
@@ -22,7 +22,7 @@ module.exports = app => {
      */
     const store = async (body, headers) => {
         try {
-            const { name, email, code, password} = body;
+            const { name, email, code, password } = body;
 
             //Validações de campo null
             const manager = body.manager == null ? false : body.manager
@@ -36,21 +36,21 @@ module.exports = app => {
             existsOrError(code, 'Código não informado!');
             existsOrError(email, 'Email não informado!');
             existsOrError(password, 'Senha não informada!');
-            
-          
-            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
-        
+
+
+            const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
+
             //Verifica se pode alterar... Somente altera quem se for manager
-            if(!(_token.type == 'manager') && manager) {
+            if (!(_token.type == 'manager') && manager) {
                 throw {
-                    erro:'Usuário não possui permissão para cadastro de manager',
-                    status:403
+                    erro: 'Usuário não possui permissão para cadastro de manager',
+                    status: 403
                 }
             }
 
             //Criptografa a senha
             const encryptedPassword = encryptPassword(password);
-            
+
             //Busca o professor caso ja exista
             const teacher = await Teacher.findOne({
                 where: {
@@ -60,9 +60,9 @@ module.exports = app => {
 
             //Se existir... Lança exceção
             if (teacher) {
-                throw  {
-                            erro:'Já existe um professor com mesmo código',
-                            status:400
+                throw {
+                    erro: 'Já existe um professor com mesmo código',
+                    status: 400
                 };
             }
 
@@ -75,11 +75,14 @@ module.exports = app => {
                 manager,
                 active
             });
-           
-        } catch(err) {
+
+        } catch (err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
-            throw err;
+            throw {
+                erro: err,
+                status: 400
+            }
         }
 
     }
@@ -89,29 +92,32 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const destroy = async (id, headers) => {
-        try{
-            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
-        
+        try {
+            const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
+
             //Verifica se pode alterar... Somente altera quem se for manager
-            if((_token.type != 'manager') && (_token.id != id)) {
+            if ((_token.type != 'manager') && (_token.id != id)) {
                 throw {
-                    erro:'Usuário não possui permissão para exclusão',
-                    status:403
+                    erro: 'Usuário não possui permissão para exclusão',
+                    status: 403
                 }
             }
 
             //Delete o professor
             const rowsDeleted = Teacher.destroy({
-                where:{
+                where: {
                     id
                 }
             });
-            
+
             //Caso não encontrar o professor, gera uma exceção
             existsOrError(rowsDeleted, 'Professor não foi encontrado.');
-        
-        } catch(err) {
-            throw err;
+
+        } catch (err) {
+            throw {
+                erro: err,
+                status: 400
+            }
         }
 
     }
@@ -121,9 +127,9 @@ module.exports = app => {
      * @param {Valor que será validado} value 
      */
     const update = async (body, headers, params) => {
-        try {   
-            
-            const { name, email, code, password} = body;
+        try {
+
+            const { name, email, code, password } = body;
 
             //Validações de campo null
             const manager = body.manager == null ? false : body.manager
@@ -132,61 +138,64 @@ module.exports = app => {
             const { id } = params
 
             //Verifica se o objeto passado esta correto
-            existsOrError(body,'Formato dos dados inválido');
+            existsOrError(body, 'Formato dos dados inválido');
 
             //Verifica se possui todos os dados foram passados
             existsOrError(id, 'Campo ID não informado!');
             existsOrError(name, 'Nome não informado!');
             existsOrError(email, 'Email não informado!');
             existsOrError(code, 'Código não informado!');
-            
-            const _token = jwt.decode(headers.authorization.replace('Bearer','').trim(), authSecret);
-          
-            if(_token.id == id || _token.type == 'manager') {
-                
-                if(!(_token.type == 'manager') && ((typeof manager !== 'undefined') || (typeof active !== 'undefined'))){
-                    throw   {
-                                erro:'Você não possui permissão para alterar campos manager/active',
-                                status:403
-                            }
+
+            const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
+
+            if (_token.id == id || _token.type == 'manager') {
+
+                if (!(_token.type == 'manager') && ((typeof manager !== 'undefined') || (typeof active !== 'undefined'))) {
+                    throw {
+                        erro: 'Você não possui permissão para alterar campos manager/active',
+                        status: 403
+                    }
                 }
 
                 var teacher
 
                 //Se a senha foi passada... Verifica se pode alterar
-                if(password){
+                if (password) {
                     //Update nos dados de acordo com o id
                     const encryptedPassword = encryptPassword(password)
-            
-                    teacher = { name, code, email, password : encryptedPassword, manager, active }
+
+                    teacher = { name, code, email, password: encryptedPassword, manager, active }
 
                     //Retorna professor alterado
-                    return await Teacher.update(teacher, 
-                    {   
-                        where: {
-                            id
-                        }
-                    }); 
+                    return await Teacher.update(teacher,
+                        {
+                            where: {
+                                id
+                            }
+                        });
                 }//Verifico se é o mesmo usuário logado
-                else{
+                else {
                     teacher = { name, code, email, manager, active }
-          
+
                     //Se não passou a senha...
-                    return await Teacher.update(teacher, 
-                        {   
+                    return await Teacher.update(teacher,
+                        {
                             where: {
                                 id
                             }
                         });
                 }
-            }else{
-                throw   {
-                            erro:'Usuário não possui permissão para alterar os dados!',
-                            status:403
-                        }
-            }     
-        } catch(err) {
-            throw err;
+            } else {
+                throw {
+                    erro: 'Usuário não possui permissão para alterar os dados!',
+                    status: 403
+                }
+            }
+        } catch (err) {
+            throw {
+                erro: err,
+                status: 400
+            }
         }
     }
 
@@ -196,60 +205,64 @@ module.exports = app => {
     */
     const index = async (query) => {
         try {
-           //Pega os dados para filtros 
-           const { sort, order, page, limit, search } = query     
-            
-           //Utilizado nos filtros
-           const Op = Sequelize.Op 
-            
-           //Faz o split para pegar todos os order e sort
-           var sortArray = sort ? sort.split(',') : []
-           var orderArray = order ? order.split(',') : []
-     
-           //Variavel para armezar o array de order e sort
-           let _order = []; 
-          
-           //Percorre todos os 'order'
-           for(let i = 0; i < order.length - 1; i++){
-                //Acumulador do order by
-                _order[i] =  [(sortArray[i] || 'id') , (orderArray[i] || 'ASC')] 
-           }
+            //Pega os dados para filtros 
+            const { sort, order, page, limit, search } = query
 
-           //Retorna todos os professores
-           const items = await Teacher.findAll({
+            //Utilizado nos filtros
+            const Op = Sequelize.Op
+
+            //Faz o split para pegar todos os order e sort
+            var sortArray = sort ? sort.split(',') : []
+            var orderArray = order ? order.split(',') : []
+
+            //Variavel para armezar o array de order e sort
+            let _order = [];
+
+            //Percorre todos os 'order'
+            for (let i = 0; i < order.length - 1; i++) {
+                //Acumulador do order by
+                _order[i] = [(sortArray[i] || 'id'), (orderArray[i] || 'ASC')]
+            }
+
+            //Retorna todos os professores
+            const items = await Teacher.findAll({
                 //Busca os dados com todos os filtros
-                attributes: ['id','name', 'code', 'email', 'manager', 'active'], 
-                where:{
-                [Op.or]: [
-                    {
-                        name: {
-                            [Op.like]: `%${search || ''}%`
+                attributes: ['id', 'name', 'code', 'email', 'manager', 'active'],
+                where: {
+                    [Op.or]: [
+                        {
+                            name: {
+                                [Op.like]: `%${search || ''}%`
+                            }
+                        },
+                        {
+                            code: {
+                                [Op.like]: `%${search || ''}%`
+                            }
+                        },
+                        {
+                            email: {
+                                [Op.like]: `%${search || ''}%`
+                            }
                         }
-                    },
-                    {
-                        code: {
-                            [Op.like]: `%${search || ''}%`
-                        }
-                    },
-                    {
-                        email:{
-                            [Op.like]: `%${search || ''}%`  
-                        }
-                    }
-                ]},
+                    ]
+                },
                 limit: parseInt(limit) || null,
                 offset: ((parseInt(page) - 1) * limit) || null,
                 order: _order
-           });
+            });
 
-           return {
-               items,
-               page,
-               limit,
-               total: items.length
-           }
-        } catch(err) {
-            throw err;
+            return {
+                items,
+                page,
+                limit,
+                total: items.length
+            }
+        } catch (err) {
+            throw {
+                erro: err,
+                status: 400
+            }
         }
     }
 
@@ -257,19 +270,19 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-   const show = async (value) => {
-        try{
+    const show = async (value) => {
+        try {
             //Retorna o professor pelo id
             return Teacher.findOne({
-                where:{
+                where: {
                     id: value
                 },
-                attributes: ['id','name', 'code', 'email', 'manager', 'active']
+                attributes: ['id', 'name', 'code', 'email', 'manager', 'active']
             });
-        } catch(err) {
+        } catch (err) {
             throw err;
         }
     }
 
-    return {store, destroy, show, index, update, encryptPassword}
+    return { store, destroy, show, index, update, encryptPassword }
 }

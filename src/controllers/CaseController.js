@@ -11,8 +11,9 @@ module.exports = app => {
 
             res.send(Case)
         }catch(err){
-            res.status(400).send({
-                erro:err
+            res.status(err.status || 400).send({
+                status:err.status || 400,
+                details:err
             })
         }
     }
@@ -28,7 +29,8 @@ module.exports = app => {
 
             res.send(Case)
         }catch(err){
-            res.status(400).send({
+            res.status(err.status || 400).send({
+                stauts:err.status || 400,
                 details:err
             })
         }
@@ -50,9 +52,9 @@ module.exports = app => {
 
         }catch(err){
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
+            return res.status(err.status || 400).send(
                 {
-                    status: 400,
+                    status: err.status || 400,
                     title: req.body.title,
                     description: req.body.description,
                     teacher: req.body.teacher,
@@ -78,9 +80,9 @@ module.exports = app => {
 
         }catch(err){
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
+            return res.status(err.status || 400).send(
                 {
-                    status: 400,
+                    status: err.status || 400,
                     name: req.body.name,
                     description: req.body.description,
                     id_teacher: req.body.id_teacher,
@@ -103,9 +105,9 @@ module.exports = app => {
             res.send(Case)
         }catch(err){
             //Se houver algum erro, retorna o objeto com a mensagem de erro
-            return res.status(400).send(
+            return res.status(err.status || 400).send(
                 {
-                    status: 400,
+                    status: err.status || 400,
                     details: err 
                 }
             )

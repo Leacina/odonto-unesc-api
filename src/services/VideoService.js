@@ -21,7 +21,6 @@ module.exports = app => {
 
             //Verifica se possui todos os dados foram passados
             existsOrError(title, 'Título não informado!');
-            existsOrError(description, 'Descrição não informada!');
             existsOrError(archive, 'Nome do arquivo não informado!');
             
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
@@ -52,7 +51,10 @@ module.exports = app => {
         } catch (err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
-            throw err;
+            throw {
+                erro: err,
+                status:400
+            }
         }
     }
 
@@ -87,7 +89,10 @@ module.exports = app => {
             existsOrError(rowsDeleted, 'Vídeo não encontrado.');
 
         } catch (err) {
-            throw err;
+            throw {
+                erro:err,
+                status:400
+            };
         }
     }
 
@@ -140,7 +145,10 @@ module.exports = app => {
                 });
            
         } catch (err) {
-            throw err;
+            throw {
+                erro: err,
+                status:400
+            }
         }
     }
 
@@ -231,6 +239,43 @@ module.exports = app => {
             }
        
             //Retorna todos os videos
+            const itemsCount = await Video.findAll({
+                where:{
+                    [Op.and]:[
+                        {
+                            [Op.or]:[
+                                {
+                                    teacher: _token.id
+                                },
+                                {
+                                    shared: true
+                                }
+                            ]
+                        },
+                        {
+                            [Op.or]: [
+                                {
+                                    title: {
+                                        [Op.like]: `%${search || ''}%`
+                                    }
+                                },
+                                {
+                                    description: {
+                                        [Op.like]: `%${search || ''}%`
+                                    }
+                                },
+                                {
+                                    archive:{
+                                        [Op.like]: `%${search || ''}%`  
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            });
+
+            //Retorna todos os videos
             const items = await Video.findAll({
                 where:{
                     [Op.and]:[
@@ -280,7 +325,7 @@ module.exports = app => {
                 //variaveis para controle da query expand
                 var {expand} = query
                 var objectTeacher;
-                console.log(teacher)
+               
                 //Monta o Objeto professor de acordo com o expand passado na query
                 if(expand){
                     expand = expand.split(',')
@@ -306,19 +351,20 @@ module.exports = app => {
                     updatedAt,
                     teacher:
                         objectTeacher ? objectTeacher : { id: teacher }} 
-
-                       // console.log(video)
             };
 
             return {
                 items : _items,
                 page,
                 limit,
-                total: items.length
+                total: itemsCount.length
             }
 
         } catch (err) {
-            throw err;
+            throw {
+                erro: err,
+                status:400
+            }
         }
     }
 

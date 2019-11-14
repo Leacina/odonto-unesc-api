@@ -1,4 +1,5 @@
 const fs = require('fs');
+const crypto = require('crypto');
 
 module.exports = app => {
     const index = (req, res) => {
@@ -43,6 +44,7 @@ module.exports = app => {
     const store = async (req, res) => {
         try {
             const files = req.files;
+           
             res.send({ message: files.file.path.substring(13)});
         } catch (error) {
             res.status(400).send({

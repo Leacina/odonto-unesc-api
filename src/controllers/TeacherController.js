@@ -12,8 +12,8 @@ module.exports = app => {
             res.send(teacher);
         } catch(err) {
             res.status(err.status || 400).send({
-                status:err.status || 400,
-                details:err
+                status: err.status || 400,
+                details: err
             });
         }
     }

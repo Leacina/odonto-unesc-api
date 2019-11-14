@@ -78,7 +78,10 @@ module.exports = app => {
         }catch(err){
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
-            throw err
+            throw {
+                erro: err,
+                status:400
+            }
         }
 
     }
@@ -144,7 +147,10 @@ module.exports = app => {
             })
 
         }catch(err){
-            throw err
+            throw {
+                erro:err,
+                status:400
+            }
         }
     }
 
@@ -158,7 +164,10 @@ module.exports = app => {
            //Retorna todos os casos
            return await Case.findAll()
         }catch(err){
-            throw err
+            throw {
+                erro: err,
+                status: 400
+            }
         }
 
     }
@@ -176,7 +185,10 @@ module.exports = app => {
                 }
             })
         }catch(err){
-            throw err
+            throw {
+               erro: err,
+               status:400
+            }
         }
     }
 
