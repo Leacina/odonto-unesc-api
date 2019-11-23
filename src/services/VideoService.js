@@ -51,10 +51,7 @@ module.exports = app => {
         } catch (err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
-            throw {
-                erro: err,
-                status:400
-            }
+            throw err
         }
     }
 
@@ -89,10 +86,7 @@ module.exports = app => {
             existsOrError(rowsDeleted, 'Vídeo não encontrado.');
 
         } catch (err) {
-            throw {
-                erro:err,
-                status:400
-            };
+            throw err
         }
     }
 
@@ -145,10 +139,7 @@ module.exports = app => {
                 });
            
         } catch (err) {
-            throw {
-                erro: err,
-                status:400
-            }
+            throw err
         }
     }
 
@@ -204,10 +195,7 @@ module.exports = app => {
                 
             }
         } catch (err) {
-            throw {
-                erro: err,
-                status:400
-            };
+            throw err
         }
     }
 
@@ -319,7 +307,7 @@ module.exports = app => {
             //TODO: Uma gambi provisória... Ajustar modo para poderem utilizar o expand
             //Tentar utilizar isso no proprio sequelize
             var _items = [];
-            for(let i = 0; i < items.length - 1; i++){
+            for(let i = 0; i < items.length; i++){
                 const { id, title, description, archive,shared,active, teacher, createdAt, updatedAt} = items[i]
               
                 //variaveis para controle da query expand
@@ -357,14 +345,11 @@ module.exports = app => {
                 items : _items,
                 page,
                 limit,
-                total: itemsCount.length
+                total: itemsCount.length - 1
             }
 
         } catch (err) {
-            throw {
-                erro: err,
-                status:400
-            }
+            throw err  
         }
     }
 

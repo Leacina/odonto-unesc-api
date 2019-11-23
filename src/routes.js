@@ -39,10 +39,11 @@ module.exports = app => {
         .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.CaseController.store)
         .get(app.src.controllers.CaseController.index)
-        .put(app.src.controllers.CaseController.update)
     app.route(URL + 'case/:id')
+        .all(app.src.config.passport.authenticate())
         .delete(app.src.controllers.CaseController.destroy)
         .get(app.src.controllers.CaseController.show)
+        .put(app.src.controllers.CaseController.update)
 
     //Rota para as atividades
     app.route(URL + 'lesson')
@@ -71,7 +72,7 @@ module.exports = app => {
         .post(multipartMiddleware,app.src.controllers.StreamController.store)
         .get(app.src.controllers.StreamController.index)
     app.route(URL + 'upload/video/:id')
-         .all(app.src.config.passport.authenticate())
+        // .all(app.src.config.passport.authenticate())
         .get(app.src.controllers.StreamController.show)
     
     app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

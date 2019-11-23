@@ -42,7 +42,7 @@ module.exports = {
     const queue = [
       queryInterface.addColumn('Case', 'id_teacher', {
         allowNull:false,
-        type:DataTypes.INTEGER,
+        type:Sequelize.INTEGER,
         references: {        
           model: 'Teacher',
           key: 'id'

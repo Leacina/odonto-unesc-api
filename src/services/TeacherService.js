@@ -79,10 +79,7 @@ module.exports = app => {
         } catch (err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
-            throw {
-                erro: err,
-                status: 400
-            }
+            throw err
         }
 
     }
@@ -114,10 +111,7 @@ module.exports = app => {
             existsOrError(rowsDeleted, 'Professor não foi encontrado.');
 
         } catch (err) {
-            throw {
-                erro: err,
-                status: 400
-            }
+            throw err
         }
 
     }
@@ -192,10 +186,7 @@ module.exports = app => {
                 }
             }
         } catch (err) {
-            throw {
-                erro: err,
-                status: 400
-            }
+            throw err
         }
     }
 
@@ -219,7 +210,7 @@ module.exports = app => {
             let _order = [];
 
             //Percorre todos os 'order'
-            for (let i = 0; i < order.length - 1; i++) {
+            for (let i = 0; i < sortArray.length - 1; i++) {
                 //Acumulador do order by
                 _order[i] = [(sortArray[i] || 'id'), (orderArray[i] || 'ASC')]
             }
@@ -259,10 +250,7 @@ module.exports = app => {
                 total: items.length
             }
         } catch (err) {
-            throw {
-                erro: err,
-                status: 400
-            }
+            throw err
         }
     }
 

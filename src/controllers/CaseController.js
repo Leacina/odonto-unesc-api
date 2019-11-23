@@ -83,9 +83,9 @@ module.exports = app => {
             return res.status(err.status || 400).send(
                 {
                     status: err.status || 400,
-                    name: req.body.name,
+                    title: req.body.title,
                     description: req.body.description,
-                    id_teacher: req.body.id_teacher,
+                    teacher: req.body.teacher,
                     details: err 
                 }
             )
