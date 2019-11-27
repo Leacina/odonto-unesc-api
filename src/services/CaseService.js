@@ -56,12 +56,12 @@ module.exports = app => {
                 
                     const teacherVideo =  await Video.findOne({
                         where: {
-                            id: videos[i],
+                            id: videos[i].video.id,
                         }
                     })
-                
+                    
                     if(!teacherVideo) throw {
-                        erro:"Video '"+videos[1]+"' não encontrado",
+                        erro:"Video '"+videos[i].video.id+"' não encontrado",
                         status:403
                     }
 
@@ -76,8 +76,9 @@ module.exports = app => {
                 
                     //Insere o video
                     await Video_Case.create({
-                        id_video : videos[i],
-                        id_case : _case.id
+                        id_video : videos[i].video.id,
+                        id_case : _case.id,
+                        position : videos[i].position
                     })
                 }
             }
@@ -126,8 +127,7 @@ module.exports = app => {
           
             //Caso não encontrar o caso, gera uma exceção
             existsOrError(rowsDeleted, 'Caso não foi encontrada.')
-            
-            return rowsDeleted
+      
         }catch(err){
             throw err
         }
@@ -168,34 +168,69 @@ module.exports = app => {
                         status:403
                 }
             }
-          
-            await Video_Case.destroy({
-                where:{
-                    id_case:id
-                }
-            })
-       
+        
             if(videos){
-                //Percorre todos os videos para cadastro
-                for(let i = 0; i < videos.length; i++){
-                    //Busca o professor do video para verificar se possui permissão
-                
-                    const teacherVideo =  await Video.findOne({
-                        where: {
-                            id: videos[i],
-                        }
-                    })
-                
-                    if(!teacherVideo) throw {
-                        erro:"Video '"+videos[1]+"' não encontrado",
-                        status:403
+
+                const _videos = await Video_Case.findAll({
+                    where:{
+                        id_case:id
                     }
-                
-                    //Insere o video
-                    await Video_Case.create({
-                        id_video : videos[i],
-                        id_case : _case.id
-                    })
+                })
+                /*await Video_Case.destroy({
+                    where:{
+                        id_case: id,
+                        //id_video:_videos[i].id_video
+                    }
+                })
+                throw 'teste'*/
+                for(let i =0;i < _videos.length; i++){
+                    var isUpdate = false
+                    //Verifico se possui esse video na requisição, caso possuir edita
+                    for(let j = 0; j < videos.length; j++){
+                        //Caso possuir um com mesmo video, faz o update
+                        if(_videos[i].id_video == videos[j].video.id){
+                            console.log(videos[j].video.id)
+                            await Video_Case.update({
+                                position: videos[j].position
+                            },{
+                                where:{ 
+                                    id_case: id,
+                                    id_video: videos[j].video.id
+                                }
+                            })
+
+                            isUpdate = true
+                        
+                        }
+                    }
+                    if(!isUpdate){
+                        console.log('teste')
+                        await Video_Case.destroy({
+                            where:{
+                                id_case: id,
+                                id_video:_videos[i].id_video
+                            }
+                        })
+                    }
+                }
+
+                //Verifica para inserir na tabela
+                for(let i = 0;i < videos.length; i++){
+                    var isInserir = true
+                    for(let j = 0;j < _videos.length; j++){
+                        if(videos[i].video.id == _videos[j].id_video){
+                            isInserir = false
+                        }
+                    }
+
+                    if(isInserir){
+                        console.log(videos[i].video.id)
+                        await Video_Case.create({
+                            id_case: id,
+                            id_video: videos[i].video.id,
+                            position: videos[i].position
+                        })
+                    }
                 }
             }
         
@@ -336,11 +371,13 @@ module.exports = app => {
                     where:{
                         id_case:id,
                     },
-                    attributes: ['id_video'] 
+                    order: [['position','ASC']],
+                    attributes: ['id_video','position']
                 })
 
                 //Monta os videos com suas info
                 var video = []
+                var videoWithPosition = []
                 for(let i = 0;i < _video_case.length; i++){
                     //Busca o video referente ao id_video
                     video[video.length] = await Video.findOne({
@@ -351,6 +388,12 @@ module.exports = app => {
                         attributes:(expand && (expand.indexOf('video') > - 1) ? 
                             ['id','title','description','archive'] : ['id'])
                     })
+
+                    videoWithPosition[videoWithPosition.length] =  {
+                                            position:_video_case[i].position,
+                                            video:video[i]
+                                        };
+
                 }
 
                 //Atribui a variavel final de retorno
@@ -361,7 +404,7 @@ module.exports = app => {
                     active,
                     createdAt,
                     updatedAt,
-                    videos:video,
+                    videos: videoWithPosition,
                     teacher:
                         objectTeacher ? objectTeacher : { id: teacher }} 
                         
