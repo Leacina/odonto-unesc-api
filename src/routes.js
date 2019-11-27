@@ -10,19 +10,30 @@ const multipartMiddleware = multipart({ uploadDir: './upload/video' });
  */
 module.exports = app => {
 
-    app.post(URL + 'signin',app.src.controllers.LoginController.signin)
-    app.post(URL + 'validateToken',app.src.controllers.LoginController.validateToken)
+    app.post(URL + 'signin', app.src.controllers.LoginController.signin)
+    app.post(URL + 'validateToken', app.src.controllers.LoginController.validateToken)
 
     //Rota para os professores
     app.route(URL + 'teacher')
         .all(app.src.config.passport.authenticate())
         .post(app.src.controllers.TeacherController.store)
-        .get(app.src.controllers.TeacherController.index)   
+        .get(app.src.controllers.TeacherController.index)
     app.route(URL + 'teacher/:id')
         .all(app.src.config.passport.authenticate())
         .delete(app.src.controllers.TeacherController.destroy)
         .put(app.src.controllers.TeacherController.update)
         .get(app.src.controllers.TeacherController.show)
+
+    //Rota para os roteiros
+    app.route(URL + 'script')
+        .all(app.src.config.passport.authenticate())
+        .post(app.src.controllers.ScriptController.store)
+        .get(app.src.controllers.ScriptController.index)
+    app.route(URL + 'script/:id')
+        .all(app.src.config.passport.authenticate())
+        .delete(app.src.controllers.ScriptController.destroy)
+        .put(app.src.controllers.ScriptController.update)
+        .get(app.src.controllers.ScriptController.show)
 
     //Rota para os estudantes
     app.route(URL + 'student')
@@ -65,16 +76,16 @@ module.exports = app => {
         .put(app.src.controllers.VideoController.update)
         .delete(app.src.controllers.VideoController.destroy)
         .get(app.src.controllers.VideoController.show)
-        
-        //Rota para os videos
+
+    //Rota para os videos
     app.route(URL + 'upload/video')
         .all(app.src.config.passport.authenticate())
-        .post(multipartMiddleware,app.src.controllers.StreamController.store)
+        .post(multipartMiddleware, app.src.controllers.StreamController.store)
         .get(app.src.controllers.StreamController.index)
     app.route(URL + 'upload/video/:id')
         // .all(app.src.config.passport.authenticate())
         .get(app.src.controllers.StreamController.show)
-    
+
     app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 }
