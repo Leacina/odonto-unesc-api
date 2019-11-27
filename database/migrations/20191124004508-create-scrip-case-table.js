@@ -39,10 +39,7 @@ module.exports = {
     });
   },
 
-  down: (queryInterface, Sequelize) => {
-    /*
-      Drop da tabela Video-Case para retornar ao inicio.
-    */
-    return queryInterface.dropTable('Video-Case');
+  down: (queryInterface) => {
+    return queryInterface.dropTable('Script-Case');
   }
 };
