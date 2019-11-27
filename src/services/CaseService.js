@@ -465,27 +465,34 @@ module.exports = app => {
                     })
                 }
             }
-   
+
             //Busca os videos relacionados aos casos
-            const video_case = await Video_Case.findAll({
+            const _video_case = await Video_Case.findAll({
                 where:{
                     id_case:id,
                 },
-                attributes: ['id_video'] 
+                order: [['position','ASC']],
+                attributes: ['id_video','position']
             })
 
             //Monta os videos com suas info
             var video = []
-            for(let i = 0;i < video_case.length; i++){
+            var videoWithPosition = []
+            for(let i = 0;i < _video_case.length; i++){
                 //Busca o video referente ao id_video
                 video[video.length] = await Video.findOne({
                     where:{
-                        id:video_case[i].id_video
+                        id:_video_case[i].id_video
                     },
                     //Seleciona o atributo de acordo com os expand
                     attributes:(expand && (expand.indexOf('video') > - 1) ? 
                         ['id','title','description','archive'] : ['id'])
                 })
+
+                videoWithPosition[videoWithPosition.length] =  {
+                                        position:_video_case[i].position,
+                                        video:video[i]
+                                    };
             }
 
             //Retorna o JSON separado para controlar os dados do professor
@@ -497,7 +504,7 @@ module.exports = app => {
                     active,
                     createdAt,
                     updatedAt,
-                    videos:video,
+                    videos:videoWithPosition,
                     teacher:
                         objectTeacher ? objectTeacher : { id: teacher }
             }
