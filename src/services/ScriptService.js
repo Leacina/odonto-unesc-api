@@ -315,10 +315,10 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-    const show = async (value) => {
+    const show = async (value, headers, query) => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-
+            
             //Retorna o roteiro pelo id
             const script = await Script.findOne({
                 where: {
@@ -326,24 +326,26 @@ module.exports = app => {
                     teacher: _token.id
                 }
             });
-
+            
+            
             if (!script) {
                 throw {
                     erro: 'Roteiro não encontrado!',
                     status: 400
                 }
             }
-
+            
+            console.log('afdasdsaf');
             const { id, title, description, teacher, shared, active, createdAt, updatedAt } = script;
-
+            
             //variaveis para controle da query expand
             var { expand } = query
             var objectTeacher;
-
+            
             //Monta o Objeto professor de acordo com o expand passado na query
             if (expand) {
                 expand = expand.split(',')
-
+                
                 //Se possuir expand para teacher, busca o cara
                 if (expand.indexOf('teacher') > -1) {
                     objectTeacher = await Teacher.findOne({
@@ -354,7 +356,7 @@ module.exports = app => {
                     })
                 }
             }
-
+            
             //Busca os casos relacionados ao roteiro
             const _script_case = await Script_Case.findAll({
                 where: {
@@ -362,7 +364,7 @@ module.exports = app => {
                 },
                 attributes: ['id_case']
             })
-
+            
             //Monta os casos com suas info
             var cases = []
             for (let i = 0; i < _script_case.length; i++) {
@@ -373,9 +375,9 @@ module.exports = app => {
                     },
                     //Seleciona o atributo de acordo com os expand
                     attributes: (expand && (expand.indexOf('cases') > - 1) ?
-                        ['id', 'title', 'description', 'teacher', 'active', 'shared'] : ['id'])
+                    ['id', 'title', 'description', 'teacher', 'active', 'shared'] : ['id'])
                 });
-
+                
                 if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('cases') > - 1) {
                     caseTeacher = await Teacher.findOne({
                         where: {
@@ -383,11 +385,11 @@ module.exports = app => {
                         },
                         attributes: { exclude: ['password'] }
                     });
-
+                    
                     cases[i]['teacher'] = caseTeacher;
                 }
             }
-
+            
             //Atribui a variavel final de retorno
             return {
                 id,
@@ -399,7 +401,7 @@ module.exports = app => {
                 updatedAt,
                 cases: cases,
                 teacher:
-                    objectTeacher ? objectTeacher : { id: teacher }
+                objectTeacher ? objectTeacher : { id: teacher }
             }
         } catch (err) {
             throw err

@@ -25,7 +25,7 @@ module.exports = app => {
      */
     const show = async (req, res) => {
         try {
-            const script = await app.src.services.ScriptService.show(req.params.id);
+            const script = await app.src.services.ScriptService.show(req.params.id, req.headers, req.query);
 
             res.send(script);
         } catch (err) {
