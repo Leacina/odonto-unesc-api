@@ -37,7 +37,7 @@ module.exports = app => {
             });
 
             if (cases) {
-                //Percorre todos os casos para cadastro
+                // Percorre todos os casos para cadastro
                 for (let i = 0; i < cases.length; i++) {
                     const currentCase = await Case.findOne({
                         where: {
@@ -46,11 +46,11 @@ module.exports = app => {
                     })
 
                     if (!currentCase) throw {
-                        erro: "Caso '" + cases[1] + "' não encontrado",
+                        erro: "Caso '" + cases[i] + "' não encontrado",
                         status: 403
                     }
 
-                    //Se não tem permissão
+                    // Se não tem permissão
                     if ((_token.id != currentCase.teacher && !currentCase.shared)) {
                         throw {
                             erro: "Usuário não possui permissão para utilizar o caso",
@@ -58,10 +58,11 @@ module.exports = app => {
                         }
                     }
 
-                    //Insere o caso
+                    // Insere o caso
                     await Script_Case.create({
                         id_script: script.id,
-                        id_case: cases[i]
+                        id_case: cases[i],
+                        position: cases[i].position
                     })
                 }
             }
@@ -136,31 +137,58 @@ module.exports = app => {
             //Verifica se pode alterar... Somente o criador do script pode altera-lo
             creatorCheck(script.teacher, _token.id);
 
-            await Script_Case.destroy({
-                where: {
-                    id_script: id
-                }
-            });
-
             if (cases) {
-                //Percorre todos os casos para cadastro
-                for (let i = 0; i < cases.length; i++) {
-                    const currentCase = await Case.findOne({
-                        where: {
-                            id: cases[i],
-                        }
-                    });
+                const _cases = await Script_Case.findAll({
+                    where: {
+                        id_script: id
+                    }
+                });
 
-                    if (!currentCase) throw {
-                        erro: "Caso '" + cases[1] + "' não encontrado",
-                        status: 403
+                for (let i = 0; i < _cases.length; i++) {
+                    var isUpdate = false
+                    //Verifico se possui esse video na requisição, caso possuir edita
+                    for (let j = 0; j < cases.length; j++) {
+                        //Caso possuir um com mesmo video, faz o update
+                        if (_cases[i].id_video == cases[j].case.id) {
+                            await Script_Case.update({
+                                position: cases[j].position
+                            }, {
+                                where: {
+                                    id_script: id,
+                                    id_case: cases[j].case.id
+                                }
+                            });
+
+                            isUpdate = true
+                        }
                     }
 
-                    //Insere o caso
-                    await Script_Case.create({
-                        id_case: cases[i],
-                        id_script: script.id
-                    });
+                    if (!isUpdate) {
+                        await Script_Case.destroy({
+                            where: {
+                                id_script: id,
+                                id_case: _cases[i].id_video
+                            }
+                        })
+                    }
+                }
+
+                //Verifica para inserir na tabela
+                for (let i = 0; i < cases.length; i++) {
+                    var isInsert = true
+                    for (let j = 0; j < _cases.length; j++) {
+                        if (cases[i].case.id == _cases[j].id_case) {
+                            isInsert = false
+                        }
+                    }
+
+                    if (isInsert) {
+                        await Script_Case.create({
+                            id_script: id,
+                            id_case: cases[i].case.id,
+                            position: cases[i].position
+                        })
+                    }
                 }
             }
 
@@ -203,7 +231,6 @@ module.exports = app => {
             //Retorna todos os scripts
             const items = await Script.findAll({
                 //Busca os dados com todos os filtros
-                attributes: ['id', 'title', 'description', 'teacher'],
                 where: {
                     [Op.or]: [
                         {
@@ -251,36 +278,41 @@ module.exports = app => {
                     }
                 }
 
-                //Busca os casos relacionados ao roteiro
+                // Busca os casos relacionados ao roteiro
                 const _script_case = await Script_Case.findAll({
                     where: {
                         id_script: id,
                     },
-                    attributes: ['id_case']
+                    order: [['position', 'ASC']],
+                    attributes: ['id_case', 'position']
                 })
 
-                //Monta os casos com suas info
-                var cases = []
+                // Monta os casos com suas informações
+                var _case = []
+                var caseWithPosition = []
                 for (let i = 0; i < _script_case.length; i++) {
-                    //Busca o caso referente ao id_case    
-                    cases[cases.length] = await Case.findOne({
+                    _case[_case.length] = await Case.findOne({
                         where: {
                             id: _script_case[i].id_case
                         },
-                        //Seleciona o atributo de acordo com os expand                        
-                        attributes: (expand && (expand.indexOf('cases') > - 1) ?
+                        attributes: (expand && (expand.indexOf('case') > - 1) ?
                             ['id', 'title', 'description', 'teacher', 'active', 'shared'] : ['id'])
-                    });
+                    })
 
-                    if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('cases') > - 1) {
+                    caseWithPosition[caseWithPosition.length] = {
+                        position: _script_case[i].position,
+                        _case: _case[i]
+                    };
+
+                    if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('case') > - 1) {
                         caseTeacher = await Teacher.findOne({
                             where: {
-                                id: cases[i]['teacher']
+                                id: _case[i]['teacher']
                             },
                             attributes: { exclude: ['password'] }
                         });
 
-                        cases[i]['teacher'] = caseTeacher;
+                        _case[i]['teacher'] = caseTeacher;
                     }
                 }
 
@@ -293,7 +325,7 @@ module.exports = app => {
                     active,
                     createdAt,
                     updatedAt,
-                    cases: cases,
+                    cases: caseWithPosition,
                     teacher:
                         objectTeacher ? objectTeacher : { id: teacher }
                 }
@@ -318,7 +350,7 @@ module.exports = app => {
     const show = async (value, headers, query) => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-            
+
             //Retorna o roteiro pelo id
             const script = await Script.findOne({
                 where: {
@@ -326,26 +358,25 @@ module.exports = app => {
                     teacher: _token.id
                 }
             });
-            
-            
+
+
             if (!script) {
                 throw {
                     erro: 'Roteiro não encontrado!',
                     status: 400
                 }
             }
-            
-            console.log('afdasdsaf');
+
             const { id, title, description, teacher, shared, active, createdAt, updatedAt } = script;
-            
+
             //variaveis para controle da query expand
             var { expand } = query
             var objectTeacher;
-            
+
             //Monta o Objeto professor de acordo com o expand passado na query
             if (expand) {
                 expand = expand.split(',')
-                
+
                 //Se possuir expand para teacher, busca o cara
                 if (expand.indexOf('teacher') > -1) {
                     objectTeacher = await Teacher.findOne({
@@ -356,40 +387,45 @@ module.exports = app => {
                     })
                 }
             }
-            
-            //Busca os casos relacionados ao roteiro
+
+            // Busca os casos relacionados ao roteiro
             const _script_case = await Script_Case.findAll({
                 where: {
                     id_script: id,
                 },
-                attributes: ['id_case']
+                order: [['position', 'ASC']],
+                attributes: ['id_case', 'position']
             })
-            
-            //Monta os casos com suas info
-            var cases = []
+
+            // Monta os casos com suas informações
+            var _case = []
+            var caseWithPosition = []
             for (let i = 0; i < _script_case.length; i++) {
-                //Busca o caso referente ao id_case
-                cases[cases.length] = await Case.findOne({
+                _case[_case.length] = await Case.findOne({
                     where: {
                         id: _script_case[i].id_case
                     },
-                    //Seleciona o atributo de acordo com os expand
-                    attributes: (expand && (expand.indexOf('cases') > - 1) ?
-                    ['id', 'title', 'description', 'teacher', 'active', 'shared'] : ['id'])
-                });
-                
-                if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('cases') > - 1) {
+                    attributes: (expand && (expand.indexOf('case') > - 1) ?
+                        ['id', 'title', 'description', 'teacher', 'active', 'shared'] : ['id'])
+                })
+
+                caseWithPosition[caseWithPosition.length] = {
+                    position: _script_case[i].position,
+                    _case: _case[i]
+                };
+
+                if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('case') > - 1) {
                     caseTeacher = await Teacher.findOne({
                         where: {
-                            id: cases[i]['teacher']
+                            id: _case[i]['teacher']
                         },
                         attributes: { exclude: ['password'] }
                     });
-                    
-                    cases[i]['teacher'] = caseTeacher;
+
+                    _case[i]['teacher'] = caseTeacher;
                 }
             }
-            
+
             //Atribui a variavel final de retorno
             return {
                 id,
@@ -399,9 +435,9 @@ module.exports = app => {
                 active,
                 createdAt,
                 updatedAt,
-                cases: cases,
+                cases: caseWithPosition,
                 teacher:
-                objectTeacher ? objectTeacher : { id: teacher }
+                    objectTeacher ? objectTeacher : { id: teacher }
             }
         } catch (err) {
             throw err
