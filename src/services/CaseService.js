@@ -4,87 +4,87 @@ const Sequelize = require('sequelize')
 const { Case, Video_Case, Video, Teacher } = require('../models');
 
 module.exports = app => {
-    const {existsOrError} = app.src.services.ValidationService;
+    const { existsOrError } = app.src.services.ValidationService;
 
     /**
      * Valida os dados que serão inseridos
      * @param {Valor que será validado} value 
      */
     const store = async (body, headers) => {
-        
-        try{
-            const { title, description, videos} = body;
-          
+
+        try {
+            const { title, description, videos } = body;
+
             const shared = body.shared == null ? false : body.shared
             const active = body.active == null ? true : body.active
 
             //Busca o token para poder pegar o id do professor
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-         
+
             //Verifica se o objeto passado esta correto
-            existsOrError(body,'Formato dos dados invalido')
+            existsOrError(body, 'Formato dos dados invalido')
 
             //Verifica se possui todos os dados foram passados
-            existsOrError(title,'Titulo não informado!')
+            existsOrError(title, 'Titulo não informado!')
             //existsOrError(description,'Descrição não informada!')
-           
+
             var _case
-            _case = await Case.findOne({ 
-                where:{
+            _case = await Case.findOne({
+                where: {
                     title
                 }
             })
 
-            if(_case) throw {
-                erro:"Ja possui um titulo com esse nome!",
-                status : 403
+            if (_case) throw {
+                erro: "Ja possui um caso com esse título!",
+                status: 403
             }
-         
+
             //Insere o dado no banco de dados, caso de algum problema, lança uma exceção
             _case = await Case.create({
                 title,
                 description,
                 active,
                 shared,
-                teacher:_token.id
+                teacher: _token.id
             })
-            
-            if(videos){
+
+            if (videos) {
                 //Percorre todos os videos para cadastro
-                for(let i = 0; i < videos.length; i++){
+                for (let i = 0; i < videos.length; i++) {
                     //Busca o professor do video para verificar se possui permissão
-                
-                    const teacherVideo =  await Video.findOne({
+
+                    const teacherVideo = await Video.findOne({
                         where: {
                             id: videos[i].video.id,
                         }
                     })
-                    
-                    if(!teacherVideo) throw {
-                        erro:"Video '"+videos[i].video.id+"' não encontrado",
-                        status:403
+
+                    if (!teacherVideo) throw {
+                        erro: "Video '" + videos[i].video.id + "' não encontrado",
+                        status: 403
                     }
 
                     //Se não tem permissão
-                    if((_token.id != teacherVideo.teacher)){
-                    
+                    if ((_token.id != teacherVideo.teacher)) {
+
                         throw {
-                            erro:"Usuário não possui permissão para deletar o video",
-                            status:403
+                            erro: "Usuário não possui permissão para deletar o video",
+                            status: 403
                         }
                     }
-                
+
                     //Insere o video
                     await Video_Case.create({
-                        id_video : videos[i].video.id,
-                        id_case : _case.id,
-                        position : videos[i].position
+                        id_video: videos[i].video.id,
+                        id_case: _case.id,
+                        position: videos[i].position
                     })
                 }
             }
             return _case
-           
-        }catch(err){
+
+        } catch (err) {
             //Se houver algum dado incorreto, lança exceção para o controller
             //com a mensagem de erro ja tratada.
             throw err
@@ -98,37 +98,38 @@ module.exports = app => {
      */
     const destroy = async (value, headers) => {
 
-        try{
+        try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-           
-            const teacherCase =  await Case.findOne({
+
+            const teacherCase = await Case.findOne({
                 where: {
                     id: value,
-                }})
+                }
+            })
 
-            if(!teacherCase) throw {
-                erro:"Caso não encontrado",
-                status:403
+            if (!teacherCase) throw {
+                erro: "Caso não encontrado",
+                status: 403
             }
 
-            if((_token.id != teacherCase.teacher)){
+            if ((_token.id != teacherCase.teacher)) {
                 throw {
-                    erro:"Usuário não possui permissão para deletar o caso",
-                    status:403
+                    erro: "Usuário não possui permissão para deletar o caso",
+                    status: 403
                 }
             }
 
             //Delete o caso
             const rowsDeleted = Case.destroy({
-                where:{
+                where: {
                     id: value
                 }
             })
-          
+
             //Caso não encontrar o caso, gera uma exceção
             existsOrError(rowsDeleted, 'Caso não foi encontrada.')
-      
-        }catch(err){
+
+        } catch (err) {
             throw err
         }
     }
@@ -137,11 +138,11 @@ module.exports = app => {
      * Valida os dados que serão alterados
      * @param {Valor que será validado} value 
      */
-    const update = async (body, params,headers) => {
+    const update = async (body, params, headers) => {
         try {
-            const { title, description, videos} = body;
+            const { title, description, videos } = body;
             const { id } = params
-            
+
             const active = body.active == null ? true : body.active
             const shared = body.shared == null ? false : body.shared
 
@@ -153,78 +154,69 @@ module.exports = app => {
             //existsOrError(title, 'Título não informado!');
             //existsOrError(description, 'Descrição não informada!');
             //existsOrError(archive, 'Nome do arquivo não informado!');
-          
+
             const _case = await Case.findOne({
                 where: {
                     id,
                 }
-            })  
+            })
 
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
 
-            if(_token.id != _case.teacher) {
+            if (_token.id != _case.teacher) {
                 throw {
-                        erro:'Usuário não possui permissão para alterar os dados desse caso!',
-                        status:403
+                    erro: 'Usuário não possui permissão para alterar os dados desse caso!',
+                    status: 403
                 }
             }
-        
-            if(videos){
+
+            if (videos) {
 
                 const _videos = await Video_Case.findAll({
-                    where:{
-                        id_case:id
+                    where: {
+                        id_case: id
                     }
                 })
-                /*await Video_Case.destroy({
-                    where:{
-                        id_case: id,
-                        //id_video:_videos[i].id_video
-                    }
-                })
-                throw 'teste'*/
-                for(let i =0;i < _videos.length; i++){
+              
+                for (let i = 0; i < _videos.length; i++) {
                     var isUpdate = false
                     //Verifico se possui esse video na requisição, caso possuir edita
-                    for(let j = 0; j < videos.length; j++){
+                    for (let j = 0; j < videos.length; j++) {
                         //Caso possuir um com mesmo video, faz o update
-                        if(_videos[i].id_video == videos[j].video.id){
-                            console.log(videos[j].video.id)
+                        if (_videos[i].id_video == videos[j].video.id) {                            
                             await Video_Case.update({
                                 position: videos[j].position
-                            },{
-                                where:{ 
+                            }, {
+                                where: {
                                     id_case: id,
                                     id_video: videos[j].video.id
                                 }
                             })
 
                             isUpdate = true
-                        
+
                         }
                     }
-                    if(!isUpdate){
-                        console.log('teste')
+                    if (!isUpdate) {
                         await Video_Case.destroy({
-                            where:{
+                            where: {
                                 id_case: id,
-                                id_video:_videos[i].id_video
+                                id_video: _videos[i].id_video
                             }
                         })
                     }
                 }
 
                 //Verifica para inserir na tabela
-                for(let i = 0;i < videos.length; i++){
+                for (let i = 0; i < videos.length; i++) {
                     var isInserir = true
-                    for(let j = 0;j < _videos.length; j++){
-                        if(videos[i].video.id == _videos[j].id_video){
+                    for (let j = 0; j < _videos.length; j++) {
+                        if (videos[i].video.id == _videos[j].id_video) {
                             isInserir = false
                         }
                     }
 
-                    if(isInserir){
-                        console.log(videos[i].video.id)
+                    if (isInserir) {
                         await Video_Case.create({
                             id_case: id,
                             id_video: videos[i].video.id,
@@ -233,14 +225,14 @@ module.exports = app => {
                     }
                 }
             }
-        
+
             return await Case.update({ title, description, shared, active },
                 {
                     where: {
                         id
                     }
                 });
-           
+
         } catch (err) {
             throw err
         }
@@ -254,32 +246,32 @@ module.exports = app => {
 
         try {
             //Pega os dados para filtros
-            const { sort, order, page, limit, search } = query   
-            
+            const { sort, order, page, limit, search } = query
+
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
 
             //Utilizado nos filtros
             const Op = Sequelize.Op
-            
+
             //Faz o split para pegar todos os order e sort
             var sortArray = sort ? sort.split(',') : ['id']
             var orderArray = order ? order.split(',') : ['ASC']
-     
+
             //Variavel para armezar o array de order e sort
-            let _order = []; 
-            
+            let _order = [];
+
             //Percorre todos os 'order'
-            for(let i = 0; i < sortArray.length - 1; i++){
-                 //Acumulador do order by
-                 _order[i] =  [(sortArray[i] || 'id') , (orderArray[i] || 'ASC')] 
+            for (let i = 0; i < sortArray.length - 1; i++) {
+                //Acumulador do order by
+                _order[i] = [(sortArray[i] || 'id'), (orderArray[i] || 'ASC')]
             }
-       
+
             //Retorna todos os videos
             const itemsCount = await Case.findAll({
-                where:{
-                    [Op.and]:[
+                where: {
+                    [Op.and]: [
                         {
-                            [Op.or]:[
+                            [Op.or]: [
                                 {
                                     teacher: _token.id
                                 },
@@ -308,10 +300,10 @@ module.exports = app => {
 
             //Retorna todos os videos
             const items = await Case.findAll({
-                where:{
-                    [Op.and]:[
+                where: {
+                    [Op.and]: [
                         {
-                            [Op.or]:[
+                            [Op.or]: [
                                 {
                                     teacher: _token.id
                                 },
@@ -338,66 +330,67 @@ module.exports = app => {
                 },
                 limit: parseInt(limit) || null,
                 offset: ((parseInt(page) - 1) * limit) || null,
-                order: _order || ['id','ASC']
+                order: _order || ['id', 'ASC']
             });
 
             //TODO: Uma gambi provisória... Ajustar modo para poderem utilizar o expand
             //Tentar utilizar isso no proprio sequelize
             var _items = [];
-            for(let i = 0; i < items.length ; i++){
-                const { id, title, description, teacher, shared,active, createdAt, updatedAt} = items[i]
-              
+            for (let i = 0; i < items.length; i++) {
+                const { id, title, description, teacher, shared, active, createdAt, updatedAt } = items[i]
+
                 //variaveis para controle da query expand
-                var {expand} = query
+                var { expand } = query
                 var objectTeacher;
-               
+
                 //Monta o Objeto professor de acordo com o expand passado na query
-                if(expand){
+                if (expand) {
                     expand = expand.split(',')
 
                     //Se possuir expand para teacher, busca o cara
-                    if(expand.indexOf('teacher') > -1){
+                    if (expand.indexOf('teacher') > -1) {
                         objectTeacher = await Teacher.findOne({
-                            where:{
-                                id : teacher
+                            where: {
+                                id: teacher
                             },
                             attributes: { exclude: ['password'] }
                         })
                     }
                 }
-                
+
                 //Busca os videos relacionados aos casos
                 const _video_case = await Video_Case.findAll({
-                    where:{
-                        id_case:id,
+                    where: {
+                        id_case: id,
                     },
-                    order: [['position','ASC']],
-                    attributes: ['id_video','position']
+                    order: [['position', 'ASC']],
+                    attributes: ['id_video', 'position']
                 })
 
                 //Monta os videos com suas info
                 var video = []
                 var videoWithPosition = []
-                for(let i = 0;i < _video_case.length; i++){
+                for (let i = 0; i < _video_case.length; i++) {
                     //Busca o video referente ao id_video
                     video[video.length] = await Video.findOne({
-                        where:{
-                            id:_video_case[i].id_video
+                        where: {
+                            id: _video_case[i].id_video
                         },
                         //Seleciona o atributo de acordo com os expand
-                        attributes:(expand && (expand.indexOf('video') > - 1) ? 
-                            ['id','title','description','archive'] : ['id'])
+                        attributes: (expand && (expand.indexOf('video') > - 1) ?
+                            ['id', 'title', 'description', 'archive'] : ['id'])
                     })
 
-                    videoWithPosition[videoWithPosition.length] =  {
-                                            position:_video_case[i].position,
-                                            video:video[i]
-                                        };
+                    videoWithPosition[videoWithPosition.length] = {
+                        position: _video_case[i].position,
+                        video: video[i]
+                    };
 
                 }
 
                 //Atribui a variavel final de retorno
-                _items[i] = { id,
+                _items[i] = {
+                    id,
                     title,
                     description,
                     shared,
@@ -406,19 +399,20 @@ module.exports = app => {
                     updatedAt,
                     videos: videoWithPosition,
                     teacher:
-                        objectTeacher ? objectTeacher : { id: teacher }} 
-                        
+                        objectTeacher ? objectTeacher : { id: teacher }
+                }
+
             };
-           
+
             return {
-                items : _items,
+                items: _items,
                 page,
                 limit,
                 total: itemsCount.length - 1
             }
 
         } catch (err) {
-            throw err  
+            throw err
         }
     }
 
@@ -426,40 +420,40 @@ module.exports = app => {
     * Valida os dados que serão retornados
     * @param {Valor que será validado} value 
     */
-   const show = async (value, query, headers) => {
+    const show = async (value, query, headers) => {
         try {
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-            
+
             //Retorna o video pelo id
-            const _case  = await Case.findOne({
+            const _case = await Case.findOne({
                 where: {
                     id: value,
-                    teacher:_token.id
+                    teacher: _token.id
                 }
             });
-        
-            if(!_case){
-                throw{
-                    erro:'Caso não encontrado!',
-                    status:400
+
+            if (!_case) {
+                throw {
+                    erro: 'Caso não encontrado!',
+                    status: 400
                 }
             }
 
-            const { id, title, description, teacher, shared,active, createdAt, updatedAt} = _case
+            const { id, title, description, teacher, shared, active, createdAt, updatedAt } = _case
 
             //variaveis para controle da query expand
-            var {expand} = query
+            var { expand } = query
             var objectTeacher;
 
             //Monta o Objeto professor de acordo com o expand passado na query
-            if(expand){
+            if (expand) {
                 expand = expand.split(',')
 
                 //Se possuir expand para teacher, busca o cara
-                if(expand.indexOf('teacher') > -1){
+                if (expand.indexOf('teacher') > -1) {
                     objectTeacher = await Teacher.findOne({
-                        where:{
-                            id : teacher
+                        where: {
+                            id: teacher
                         },
                         attributes: { exclude: ['password'] }
                     })
@@ -468,50 +462,50 @@ module.exports = app => {
 
             //Busca os videos relacionados aos casos
             const _video_case = await Video_Case.findAll({
-                where:{
-                    id_case:id,
+                where: {
+                    id_case: id,
                 },
-                order: [['position','ASC']],
-                attributes: ['id_video','position']
+                order: [['position', 'ASC']],
+                attributes: ['id_video', 'position']
             })
 
             //Monta os videos com suas info
             var video = []
             var videoWithPosition = []
-            for(let i = 0;i < _video_case.length; i++){
+            for (let i = 0; i < _video_case.length; i++) {
                 //Busca o video referente ao id_video
                 video[video.length] = await Video.findOne({
-                    where:{
-                        id:_video_case[i].id_video
+                    where: {
+                        id: _video_case[i].id_video
                     },
                     //Seleciona o atributo de acordo com os expand
-                    attributes:(expand && (expand.indexOf('video') > - 1) ? 
-                        ['id','title','description','archive'] : ['id'])
+                    attributes: (expand && (expand.indexOf('video') > - 1) ?
+                        ['id', 'title', 'description', 'archive'] : ['id'])
                 })
 
-                videoWithPosition[videoWithPosition.length] =  {
-                                        position:_video_case[i].position,
-                                        video:video[i]
-                                    };
+                videoWithPosition[videoWithPosition.length] = {
+                    position: _video_case[i].position,
+                    video: video[i]
+                };
             }
 
             //Retorna o JSON separado para controlar os dados do professor
             return {
-                    id,
-                    title,
-                    description,
-                    shared,
-                    active,
-                    createdAt,
-                    updatedAt,
-                    videos:videoWithPosition,
-                    teacher:
-                        objectTeacher ? objectTeacher : { id: teacher }
+                id,
+                title,
+                description,
+                shared,
+                active,
+                createdAt,
+                updatedAt,
+                videos: videoWithPosition,
+                teacher:
+                    objectTeacher ? objectTeacher : { id: teacher }
             }
         } catch (err) {
             throw err
         }
     }
 
-    return {store, destroy, show, index, update}
+    return { store, destroy, show, index, update }
 }
