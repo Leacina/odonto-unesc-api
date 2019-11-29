@@ -41,9 +41,9 @@ module.exports = app => {
                 for (let i = 0; i < cases.length; i++) {
                     const currentCase = await Case.findOne({
                         where: {
-                            id: cases[i],
+                            id: cases[i].case.id,
                         }
-                    })
+                    });                    
 
                     if (!currentCase) throw {
                         erro: "Caso '" + cases[i] + "' não encontrado",
@@ -61,7 +61,7 @@ module.exports = app => {
                     // Insere o caso
                     await Script_Case.create({
                         id_script: script.id,
-                        id_case: cases[i],
+                        id_case: cases[i].case.id,
                         position: cases[i].position
                     })
                 }
@@ -127,7 +127,7 @@ module.exports = app => {
             existsOrError(id, 'Campo ID não informado!');
 
             const _token = jwt.decode(headers.authorization.replace('Bearer', '').trim(), authSecret);
-
+        
             const script = await Script.findOne({
                 where: {
                     id,
@@ -143,13 +143,15 @@ module.exports = app => {
                         id_script: id
                     }
                 });
-
+                
+                
                 for (let i = 0; i < _cases.length; i++) {
                     var isUpdate = false
+                    
                     //Verifico se possui esse video na requisição, caso possuir edita
                     for (let j = 0; j < cases.length; j++) {
                         //Caso possuir um com mesmo video, faz o update
-                        if (_cases[i].id_video == cases[j].case.id) {
+                        if (_cases[i].id_case == cases[j].case.id) {                            
                             await Script_Case.update({
                                 position: cases[j].position
                             }, {
@@ -162,12 +164,12 @@ module.exports = app => {
                             isUpdate = true
                         }
                     }
-
+                    
                     if (!isUpdate) {
-                        await Script_Case.destroy({
+                        await Script_Case.destroy({                            
                             where: {
                                 id_script: id,
-                                id_case: _cases[i].id_video
+                                id_case: _cases[i].id_case
                             }
                         })
                     }
@@ -182,7 +184,7 @@ module.exports = app => {
                         }
                     }
 
-                    if (isInsert) {
+                    if (isInsert) {                        
                         await Script_Case.create({
                             id_script: id,
                             id_case: cases[i].case.id,
