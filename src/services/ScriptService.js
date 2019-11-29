@@ -303,7 +303,7 @@ module.exports = app => {
 
                     caseWithPosition[caseWithPosition.length] = {
                         position: _script_case[i].position,
-                        _case: _case[i]
+                        case: _case[i]
                     };
 
                     if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('case') > - 1) {
@@ -413,7 +413,7 @@ module.exports = app => {
 
                 caseWithPosition[caseWithPosition.length] = {
                     position: _script_case[i].position,
-                    _case: _case[i]
+                    case: _case[i]
                 };
 
                 if (expand && expand.indexOf('teacher') > - 1 && expand.indexOf('case') > - 1) {
