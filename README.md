@@ -10,7 +10,7 @@ Passo 1 : Baixar o projeto inteiro do git;
 
 Passo 2 : Acessar o caminho do projeto pelo CMD. Ex: cd desktop/unidonto;
 
-Passo 3 : É necessário instalar as dependencias do projeto.
+Passo 3 : É necessário instalar as dependencias do projeto;
 
       "dependencies": {
 
